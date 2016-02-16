@@ -1,1 +1,1 @@
--s 42 tests/t102
+-s 42 tests/t102.gpl

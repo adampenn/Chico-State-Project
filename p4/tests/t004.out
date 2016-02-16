@@ -4,7 +4,6 @@ gpl.cpp::main()
   read_keypresses_from_standard_input(false)
   dump_pixels(false)
   symbol_table(true)
-  print_symbol_table(true)
   graphics(false)
 
 gpl.cpp::main() Calling yyparse()
@@ -21,6 +20,6 @@ int nums[1] = 42
 int nums[2] = 42
 int nums[3] = 42
 int nums[4] = 42
-If graphics was enabled gpl program would execute now.
+Graphics is turned off by the Makefile.  Program exiting.
 
 gpl.cpp::main() done.

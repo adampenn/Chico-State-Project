@@ -4,7 +4,6 @@ gpl.cpp::main()
   read_keypresses_from_standard_input(false)
   dump_pixels(false)
   symbol_table(true)
-  print_symbol_table(true)
   graphics(false)
 
 gpl.cpp::main() Calling yyparse()
@@ -17,6 +16,6 @@ No errors found (parser probably worked correctly).
 
 Printing the symbol table from main()
 int i = 42
-If graphics was enabled gpl program would execute now.
+Graphics is turned off by the Makefile.  Program exiting.
 
 gpl.cpp::main() done.

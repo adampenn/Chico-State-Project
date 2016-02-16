@@ -1,1 +1,1 @@
--s 42 tests/t106
+-s 42 tests/t106.gpl

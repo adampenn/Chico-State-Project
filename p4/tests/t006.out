@@ -4,7 +4,6 @@ gpl.cpp::main()
   read_keypresses_from_standard_input(false)
   dump_pixels(false)
   symbol_table(true)
-  print_symbol_table(true)
   graphics(false)
 
 gpl.cpp::main() Calling yyparse()
@@ -19,6 +18,6 @@ Printing the symbol table from main()
 int _start_with_an_underscore = 42
 int a_very_long_identifier = 42
 int an_identifier_with_digits_1234 = 42
-If graphics was enabled gpl program would execute now.
+Graphics is turned off by the Makefile.  Program exiting.
 
 gpl.cpp::main() done.

@@ -4,7 +4,6 @@ gpl.cpp::main()
   read_keypresses_from_standard_input(false)
   dump_pixels(false)
   symbol_table(true)
-  print_symbol_table(true)
   graphics(false)
 
 gpl.cpp::main() Calling yyparse()
@@ -6016,6 +6015,6 @@ double values[1996] = 3.14159
 double values[1997] = 3.14159
 double values[1998] = 3.14159
 double values[1999] = 3.14159
-If graphics was enabled gpl program would execute now.
+Graphics is turned off by the Makefile.  Program exiting.
 
 gpl.cpp::main() done.

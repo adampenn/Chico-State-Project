@@ -1,22 +1,45 @@
+// updated 2/14/2016
+
 #include "gpl_type.h"
 #include "gpl_assert.h"
 using namespace std;
 
 string gpl_type_to_string(Gpl_type gpl_type)
 {
-  // INT & INT is true
-  // INT_ARRAY & INT is true
-  // by using bitwise and (&),  INT and INT_ARRAY retult in return "int";
-  if (gpl_type & INT) return "int";
-  else if (gpl_type & DOUBLE) return "double";
-  else if (gpl_type & STRING) return "string";
-  else if (gpl_type & GAME_OBJECT) return "game_object";
-  else if (gpl_type & ANIMATION_BLOCK) return "animation_block";
-  else
+  switch (gpl_type)
   {
-    assert(false);
-    return "error"; // keeps compiler happy
+    case NO_TYPE: return "no type";
+    case INT: return "int";
+    case DOUBLE: return "double";
+    case STRING: return "string";
+    case ANIMATION_BLOCK: return "animation_block";
+    case GAME_OBJECT: return "game_object";
+    case CIRCLE: return "circle";
+    case RECTANGLE: return "rectangle";
+    case TRIANGLE: return "triangle";
+    case TEXTBOX: return "textbox";
+    case PIXMAP: return "pixmap";
+    case ARRAY: return "array";
+    case INT_ARRAY: return "int array";
+    case DOUBLE_ARRAY: return "double array";
+    case STRING_ARRAY: return "string array";
+    case GAME_OBJECT_ARRAY: return "game_object array";
+    case CIRCLE_ARRAY: return "circle array";
+    case RECTANGLE_ARRAY: return "rectangle array";
+    case TRIANGLE_ARRAY: return "triangle array";
+    case TEXTBOX_ARRAY: return "textbox array";
+    case PIXMAP_ARRAY: return "pixmap array";
+    default: assert(false); return "error";
   }
+}
+
+string gpl_type_to_base_string(Gpl_type gpl_type)
+{
+  // if this is an array, use bitwise exclusive OR to unset ARRAY bit
+  if (gpl_type & ARRAY)
+    return gpl_type_to_string((Gpl_type) (gpl_type ^ ARRAY));
+  else 
+    return gpl_type_to_string(gpl_type);
 }
 
 string status_to_string(Status status)
