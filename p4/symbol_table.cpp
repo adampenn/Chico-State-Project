@@ -1,12 +1,12 @@
-#include "symbol_tabel.h"
+#include "symbol_table.h"
 
-static Symbol_table *Symbol_table::m_instance = NULL;
+/*static*/ Symbol_table *Symbol_table::m_instance = NULL;
 
 Symbol_table::Symbol_table(){
   
 }
 
-static Symbol_table *Symbol_table::instance() {
+/*static*/ Symbol_table *Symbol_table::instance() {
   if (m_instance == NULL)
     m_instance = new Symbol_table();
   return m_instance;

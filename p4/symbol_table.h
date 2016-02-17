@@ -1,6 +1,3 @@
-#include <unordered_map>
-#include <iostream>
-#include <string>
 #include "symbol.h"
 
 using std::unordered_map;
@@ -18,7 +15,7 @@ class Symbol_table {
 
   private:
     static Symbol_table* m_instance;
-    unordered_map<string, Symbol> mymap;
+    unordered_map<string, Symbol*> mymap;
     
 }
 
