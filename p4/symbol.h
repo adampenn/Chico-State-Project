@@ -1,11 +1,12 @@
 #include <unordered_map>
 #include <iostream>
 #include <string>
+#include "gpl_assert.h"
 
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
-#define UNDEFINED_INDEX -1
+#define UNDEFINED_INDEX INT_MIN
 
 class Symbol {
   public:
@@ -16,7 +17,9 @@ class Symbol {
     string get_string_value(int index = UNDEFINED_INDEX) const;
   
   private:
-    string m_name, m_value; // should value be a pointer or somethign to deal with it being int double and string and arrays
+    string m_name;
+    void* m_value;
+    int m_size;
     Gpl_type m_type;
     
 }
