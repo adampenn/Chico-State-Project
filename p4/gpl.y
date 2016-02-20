@@ -20,6 +20,7 @@ extern int line_count;            // current line in the input; from record.l
 #include <iostream>
 #include <string>
 using namespace std;
+Symbol_table* table = Symbol_table::instance();
 
 // bison syntax to indicate the end of the header
 %} 
@@ -47,6 +48,7 @@ using namespace std;
  int            union_int;
  double		union_double;
  std::string    *union_string;  // MUST be a pointer to a string (this sucks!)
+ enum Gpl_type	union_gpl_type;
 }
 
 // turn on verbose (longer) error messages
@@ -147,6 +149,7 @@ using namespace std;
 %token <union_int> 	T_INT_CONSTANT    "int constant"
 %token <union_double> 	T_DOUBLE_CONSTANT "double constant"
 %token <union_string> 	T_STRING_CONSTANT "string constant"
+%type <union_gpl_type>	simple_type
 
 // special token that does not match any production
 // used for characters that are not part of the language
@@ -190,14 +193,38 @@ declaration:
 //---------------------------------------------------------------------
 variable_declaration:
     simple_type  T_ID  optional_initializer
+    {
+      Symbol* symbol;
+      if (table->lookup(*$2) == NULL) {
+        if ($1 == INT) {
+	  symbol = new Symbol(*$2, 42);
+	  table->insert(*$2, symbol);
+	} else if ($1 == DOUBLE) {
+          symbol = new Symbol(*$2, 3.14159);
+        } else if ($1 == STRING) {
+          symbol = new Symbol(*$2, "Hello, World");
+        }
+      } else {
+        // error
+      }
+    }
     | simple_type  T_ID  T_LBRACKET T_INT_CONSTANT T_RBRACKET
     ;
 
 //---------------------------------------------------------------------
 simple_type:
     T_INT
+    {
+      $$ = INT;
+    }
     | T_DOUBLE
+    {
+      $$ = DOUBLE;
+    }
     | T_STRING
+    {
+      $$ = STRING;
+    }
     ;
 
 //---------------------------------------------------------------------

@@ -228,13 +228,14 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 46 "gpl.y" /* yacc.c:1909  */
+#line 47 "gpl.y" /* yacc.c:1909  */
 
  int            union_int;
  double		union_double;
  std::string    *union_string;  // MUST be a pointer to a string (this sucks!)
+ enum Gpl_type	union_gpl_type;
 
-#line 238 "y.tab.h" /* yacc.c:1909  */
+#line 239 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
