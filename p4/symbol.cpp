@@ -3,27 +3,40 @@
 Symbol::Symbol(string name, int size, Gpl_type type){
   m_name = name;
   m_type = type;
+  m_size = size;
   if (type == INT_ARRAY) {
     m_value = new int[size];
+    for (int i=0; i < m_size; i++) {
+      ((int*)m_value)[i] = 42;
+    }
   } else if (type == DOUBLE_ARRAY) {
     m_value = new double[size];
+    for (int i=0; i < m_size; i++) {
+      ((double*)m_value)[i] = 3.14159;
+    }
   } else if (type == STRING_ARRAY) {
     m_value = new string[size];
+    for (int i=0; i < m_size; i++) {
+      ((string*)m_value)[i] = "Hello world";
+    }
   }
 }
 Symbol::Symbol(string name, int value){
   m_name = name;
   m_type = INT_ARRAY;
+  m_size = UNDEFINED_SIZE;
   m_value = (void *) new int(value);
 }
 Symbol::Symbol(string name, double value){
   m_name = name;
   m_type = DOUBLE;
+  m_size = UNDEFINED_SIZE;
   m_value = (void *) new double(value);
 }
 Symbol::Symbol(string name, string value){
   m_name = name;
   m_type = STRING;
+  m_size = UNDEFINED_SIZE;
   m_value = (void *) new string(value);
 }
 
@@ -91,23 +104,24 @@ string Symbol::get_string_value(int index) const{
   }  
 }
 
-void Symbol::print(int index) {
-  // if array go threw whole array;
+void Symbol::print(ostream &os) {
   if (m_type == INT) {
-    cout << "int " << m_name << " = " << *((int *) m_value);
+    os << "int " << m_name << " = " << *((int *) m_value);
   } else if (m_type == INT_ARRAY) {
-    for (int i = 0; i < m_size; i++)
-      cout << "int " << m_name << " = " << ((int *)m_value)[index];
+    assert(m_type == INT_ARRAY);
+    os << m_type;
+    for (int i = 0; i < m_size-1; i++);
+      //os << "int " << m_name << " = " << ((int *)m_value)[i];
   } else if (m_type == DOUBLE) {
-    cout << "double " << m_name << " = " << *((double *) m_value);
+    os << "double " << m_name << " = " << *((double *) m_value);
   } else if (m_type == DOUBLE_ARRAY) {
-    for (int i = 0; i < m_size; i++)
-      cout << "double " << m_name << " = " << ((double *)m_value)[index];
+    for (int i = 0; i < m_size-1; i++)
+      os << "double " << m_name << " = " << ((double *)m_value)[i];
   } else if (m_type == STRING) {
-    cout << "string " << m_name << " = " << "\"" << *((string *) m_value) << "\"";
+    os << "string " << m_name << " = " << "\"" << *((string *) m_value) << "\"";
   } else if (m_type == STRING_ARRAY) {
-    for (int i = 0; i < m_size; i++)
-      cout << "string " << m_name << " = " << "\"" << ((string *)m_value)[i] << "\"";
+    for (int i = 0; i < m_size-1; i++)
+      os << "string " << m_name << " = " << "\"" << ((string *)m_value)[i] << "\"";
   }
 }
 

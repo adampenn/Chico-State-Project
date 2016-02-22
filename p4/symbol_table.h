@@ -6,6 +6,7 @@
 
 class Symbol_table {
   public:
+    static Symbol_table* m_instance;
     Symbol_table();
     static Symbol_table* instance();
     Symbol* lookup(string name);
@@ -13,7 +14,6 @@ class Symbol_table {
     void insert(string name, Symbol* symbol);
 
   private:
-    static Symbol_table* m_instance;
     unordered_map<string, Symbol*> mymap;
     
 };

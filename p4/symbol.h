@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <string>
+#include <list>
 #include "gpl_assert.h"
 #include "gpl_type.h"
 #include "limits.h"
@@ -9,11 +10,13 @@ using std::unordered_map;
 using std::string;
 using std::cout;
 using std::ostream;
+using std::list;
 
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
 #define UNDEFINED_INDEX INT_MIN
+#define UNDEFINED_SIZE INT_MIN
 
 class Symbol {
   public:
@@ -28,7 +31,7 @@ class Symbol {
     int get_int_value(int index = UNDEFINED_INDEX) const;
     double get_double_value(int index = UNDEFINED_INDEX) const;
     string get_string_value(int index = UNDEFINED_INDEX) const;
-    void print(int index = UNDEFINED_INDEX);
+    void print(ostream &os);
   
   private:
     string m_name;

@@ -209,6 +209,23 @@ variable_declaration:
       }
     }
     | simple_type  T_ID  T_LBRACKET T_INT_CONSTANT T_RBRACKET
+    {
+      Symbol* symbol;
+      if (table->lookup(*$2) == NULL) {
+        if ($1 == INT) {
+	  symbol = new Symbol(*$2, 7, INT_ARRAY);
+	  table->insert(*$2, symbol);
+	} else if ( $1 == DOUBLE) {
+          symbol = new Symbol(*$2, 7, DOUBLE_ARRAY);
+	  table->insert(*$2, symbol);
+	} else if ($1 == STRING) {
+	  symbol = new Symbol(*$2, 7, STRING_ARRAY);
+	  table->insert(*$2, symbol);
+        }
+      } else {
+        // error
+      }
+    }
     ;
 
 //---------------------------------------------------------------------
