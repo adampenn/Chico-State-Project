@@ -1,6 +1,0 @@
-double a = 1.2345;
-
-// these are all ok
-int b = !a;
-int c = !0.0;
-int d = !.12346;

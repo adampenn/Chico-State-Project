@@ -1,7 +1,0 @@
-int i;
-double x;
-
-on akey
-{
-    i = x;
-}

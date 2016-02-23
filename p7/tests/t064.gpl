@@ -1,7 +1,0 @@
-double x = 3.14159;
-string str = "hello";
-
-on akey
-{
-    x += str;
-}

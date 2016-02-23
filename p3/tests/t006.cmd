@@ -1,1 +1,0 @@
--s 42 tests/t006.gpl

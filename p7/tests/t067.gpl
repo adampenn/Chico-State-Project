@@ -1,7 +1,0 @@
-string str1 = "hello";
-string str2 = "o";
-
-on akey
-{
-    str1 -= str2;
-}
