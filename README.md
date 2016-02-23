@@ -1,2 +1,0 @@
-# gpl
-Compilers Class

@@ -1,7 +1,0 @@
-double x = 3.14159;
-on akey
-{
-    if (x + 3.14159)
-        print("yes");
-    else print("no");
-}

@@ -1,2 +1,0 @@
-int array[10];
-int num = array[3].x;

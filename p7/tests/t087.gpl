@@ -1,6 +1,0 @@
-rectangle my_rectangle(x = 100, y = 100);
-
-on akey
-{
-    print(my_rectangle);
-}

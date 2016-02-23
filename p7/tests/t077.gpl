@@ -1,7 +1,0 @@
-int i = 1;
-int nums[4];
-
-on akey
-{
-    nums[i * .25] = 42;
-}
