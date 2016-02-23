@@ -11,6 +11,7 @@ using std::string;
 using std::cout;
 using std::ostream;
 using std::list;
+using std::endl;
 
 #ifndef SYMBOL_H
 #define SYMBOL_H

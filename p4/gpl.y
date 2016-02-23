@@ -198,14 +198,14 @@ variable_declaration:
       if (table->lookup(*$2) == NULL) {
         if ($1 == INT) {
 	  symbol = new Symbol(*$2, 42);
-	  table->insert(*$2, symbol);
 	} else if ($1 == DOUBLE) {
           symbol = new Symbol(*$2, 3.14159);
         } else if ($1 == STRING) {
-          symbol = new Symbol(*$2, "Hello, World");
+          symbol = new Symbol(*$2, "Hello world");
         }
+	table->insert(*$2, symbol);
       } else {
-        // error
+        Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$2);
       }
     }
     | simple_type  T_ID  T_LBRACKET T_INT_CONSTANT T_RBRACKET
@@ -213,17 +213,15 @@ variable_declaration:
       Symbol* symbol;
       if (table->lookup(*$2) == NULL) {
         if ($1 == INT) {
-	  symbol = new Symbol(*$2, 7, INT_ARRAY);
-	  table->insert(*$2, symbol);
+	  symbol = new Symbol(*$2, $4, INT_ARRAY);
 	} else if ( $1 == DOUBLE) {
-          symbol = new Symbol(*$2, 7, DOUBLE_ARRAY);
-	  table->insert(*$2, symbol);
+          symbol = new Symbol(*$2, $4, DOUBLE_ARRAY);
 	} else if ($1 == STRING) {
-	  symbol = new Symbol(*$2, 7, STRING_ARRAY);
-	  table->insert(*$2, symbol);
+	  symbol = new Symbol(*$2, $4, STRING_ARRAY);
         }
+	table->insert(*$2, symbol);
       } else {
-        // error
+        Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$2);
       }
     }
     ;

@@ -23,7 +23,7 @@ Symbol::Symbol(string name, int size, Gpl_type type){
 }
 Symbol::Symbol(string name, int value){
   m_name = name;
-  m_type = INT_ARRAY;
+  m_type = INT;
   m_size = UNDEFINED_SIZE;
   m_value = (void *) new int(value);
 }
@@ -43,6 +43,16 @@ Symbol::Symbol(string name, string value){
 Gpl_type Symbol::get_type(){
   return m_type;
 }
+
+/*Gpl_type get_base_type(){
+  if (m_type == INT || m_type == INT_ARRAY) {
+    return INT;
+  } else if (m_type == DOUBLE || m_type == DOUBLE_ARRAY) {
+    return DOUBLE;
+  } else if (m_type == STRING || m_type == STRING_ARRAY) {
+    return STRING;
+  }
+}*/
 
 void Symbol::set(int value, int index) {
   if (index == UNDEFINED_INDEX) {
@@ -106,37 +116,20 @@ string Symbol::get_string_value(int index) const{
 
 void Symbol::print(ostream &os) {
   if (m_type == INT) {
-    os << "int " << m_name << " = " << *((int *) m_value);
+    os << "int " << m_name << " = " << *((int *) m_value) << endl;
   } else if (m_type == INT_ARRAY) {
-    assert(m_type == INT_ARRAY);
-    os << m_type;
-    for (int i = 0; i < m_size-1; i++);
-      //os << "int " << m_name << " = " << ((int *)m_value)[i];
+    for (int i = 0; i < m_size; i++)
+      os << "int " << m_name << "[" << i << "] = " << ((int *)m_value)[i] << endl;
   } else if (m_type == DOUBLE) {
-    os << "double " << m_name << " = " << *((double *) m_value);
+    os << "double " << m_name << " = " << *((double *) m_value) << endl;
   } else if (m_type == DOUBLE_ARRAY) {
-    for (int i = 0; i < m_size-1; i++)
-      os << "double " << m_name << " = " << ((double *)m_value)[i];
+    for (int i = 0; i < m_size; i++)
+      os << "double " << m_name << "[" << i << "] = " << ((double *)m_value)[i] << endl;
   } else if (m_type == STRING) {
-    os << "string " << m_name << " = " << "\"" << *((string *) m_value) << "\"";
+    os << "string " << m_name << " = " << "\"" << *((string *) m_value) << "\"" << endl;
   } else if (m_type == STRING_ARRAY) {
-    for (int i = 0; i < m_size-1; i++)
-      os << "string " << m_name << " = " << "\"" << ((string *)m_value)[i] << "\"";
+    for (int i = 0; i < m_size; i++)
+      os << "string " << m_name << "[" << i << "] = " << "\"" << ((string *)m_value)[i] << "\"" << endl;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
