@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <list>
-#include <math.h>
+#include <cmath>
 #include "gpl_assert.h"
 #include "gpl_type.h"
 #include "limits.h"

@@ -140,6 +140,19 @@ int Expression::eval_int() {
       default:
         assert(false && "Finish this shit cracker");
     }
+  } else if (m_kind == UNARY) {
+    switch (m_oper) {
+      case ABS: {
+        return abs (m_left->eval_int());
+      } case FLOOR: {
+        return floor (m_left->eval_int());
+      } case SQRT: {
+        return sqrt (m_left->eval_int());
+      } case MINUS: {
+        return -(m_left->eval_int());
+        break;
+      }
+    }
   }
   
   /*
@@ -174,10 +187,10 @@ int Expression::eval_int() {
 }
 
 double Expression::eval_double() {
+  if (m_type == INT) {
+    return eval_int();
+  }
   if (m_kind == CONSTANT) {
-    if (m_type == INT) {
-      return (double)m_int;
-    }
     assert(m_type == DOUBLE);
     return m_double;
   } else if (m_kind == VARIABLE) {
@@ -197,12 +210,39 @@ double Expression::eval_double() {
     }
   } else if (m_kind == UNARY) {
     switch (m_oper) {
-      case SIN: {
+      case MINUS: {
+        return -(m_left->eval_double());
+        break;
+      } case SIN: {
         return sin (m_left->eval_double()*M_PI/180);
         break;
-      }
-      default:
-        assert(false && "Finish this shit cracker");
+      } case COS: {
+        return cos (m_left->eval_double()*M_PI/180);
+        break;
+      } case TAN: {
+        return tan (m_left->eval_double()*M_PI/180);
+        break;
+      } case ASIN: {
+        return asin (m_left->eval_double()) * 180 / M_PI;
+        break;
+      } case ACOS: {
+        return acos (m_left->eval_double()) * 180 / M_PI;
+        break;
+      } case ATAN: {
+        return atan (m_left->eval_double()) * 180 / M_PI;
+        break;
+      } case SQRT: {
+        return sqrt (m_left->eval_double());
+        break;
+      } case ABS: {
+        return abs (m_left->eval_double());
+        break;
+      } case FLOOR: {
+        return floor (m_left->eval_double());
+        break;
+      } default:
+        return INT_MIN;
+        //assert(false && "Finish this shit cracker");
     }
   }
  assert(false && "WRITE THIS FUNCTION");
