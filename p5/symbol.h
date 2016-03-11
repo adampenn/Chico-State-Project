@@ -6,12 +6,16 @@
 #include "gpl_assert.h"
 #include "gpl_type.h"
 #include "limits.h"
+#include <sstream>
+
+using std::stringstream;
 using std::unordered_map;
 using std::string;
 using std::cout;
 using std::ostream;
 using std::list;
 using std::endl;
+using std::to_string;
 
 #ifndef SYMBOL_H
 #define SYMBOL_H

@@ -75,7 +75,15 @@ Expression::Expression(Operator_type oper, Expression* left) {
   m_variable = NULL;
   m_left = left;
   m_right = NULL;
-  if (oper == LESS_THAN || oper == GREATER_THAN || oper == GREATER_THAN_EQUAL || oper == LESS_THAN_EQUAL || oper == AND || oper == NOT || oper == OR || oper == EQUAL || oper == NOT_EQUAL || oper == TOUCHES || oper == NEAR || oper == FLOOR || oper == RANDOM) {
+  if (oper == LESS_THAN || oper == GREATER_THAN || oper == GREATER_THAN_EQUAL || oper == LESS_THAN_EQUAL || oper == AND || oper == NOT || oper == OR || oper == EQUAL || oper == NOT_EQUAL || oper == TOUCHES || oper == NEAR || oper == RANDOM) {
+    m_type = INT;
+  } else if (oper == SQRT && left->get_type() == DOUBLE) {
+    m_type = DOUBLE;
+  } else if (oper == SQRT && left->get_type() == INT) {
+    m_type = INT;
+  } else if (oper == FLOOR && left->get_type() == DOUBLE) {
+    m_type = DOUBLE;
+  } else if (oper == FLOOR && left->get_type() == INT) {
     m_type = INT;
   } else if (oper == ABS && left->get_type() == DOUBLE) {
     m_type = DOUBLE;
@@ -122,28 +130,40 @@ Gpl_type Expression::get_type() {
 }
 
 int Expression::eval_int() {
+  if (m_type != INT) {
+    cout << m_type;
+    assert(false && "Issue error here");
+  }
   if (m_kind == CONSTANT) {
     assert(m_type == INT);
     return m_int;
+  } else if (m_oper == FLOOR && m_type == DOUBLE) {
+    return (int) m_double;
   } else if (m_kind == VARIABLE) {
     return m_variable->get_int_value();
   } else if (m_kind == BINARY) {
     switch (m_oper) {
-      case MULTIPLY: {
+      case EQUAL: {
+        return m_left->eval_double() == m_right->eval_double();
+      } case DIVIDE: {
+        return m_left->eval_int() / m_right->eval_int();
+        break;
+      } case MULTIPLY: {
         return m_left->eval_int() * m_right->eval_int();
         break;
-      }
-      case PLUS: {
+      } case PLUS: {
         return m_left->eval_int() + m_right->eval_int();
         break;
-      }
-      default:
+      } default:
         assert(false && "Finish this shit cracker");
     }
   } else if (m_kind == UNARY) {
     switch (m_oper) {
       case ABS: {
         return abs (m_left->eval_int());
+      } case RANDOM: {
+        srand (time(NULL));
+        return rand() % (m_left->eval_int());
       } case FLOOR: {
         return floor (m_left->eval_int());
       } case SQRT: {
@@ -151,7 +171,8 @@ int Expression::eval_int() {
       } case MINUS: {
         return -(m_left->eval_int());
         break;
-      }
+      } default:
+        assert(false && "Finish this shit cracker");
     }
   }
   
@@ -197,11 +218,20 @@ double Expression::eval_double() {
     return m_variable->get_double_value();
   } else if (m_kind == BINARY) {
     switch (m_oper) {
-      case MULTIPLY: {
+      case AND: {
+        return m_left->eval_double() && m_right->eval_double();
+      } case EQUAL: {
+        return m_left->eval_double() == m_right->eval_double();
+      } case DIVIDE: {
+        return m_left->eval_double() / m_right->eval_doubel();
+        break;
+      } case MULTIPLY: {
         return m_left->eval_double() * m_right->eval_double();
         break;
-      }
-      case PLUS: {
+      } case MINUS: {
+        return m_left->eval_double() - m_right->eval_double();
+        break;
+      } case PLUS: {
         return m_left->eval_double() + m_right->eval_double();
         break;
       }
@@ -210,7 +240,9 @@ double Expression::eval_double() {
     }
   } else if (m_kind == UNARY) {
     switch (m_oper) {
-      case MINUS: {
+      case NOT: {
+        return !(m_left->eval_double());
+      } case MINUS: {
         return -(m_left->eval_double());
         break;
       } case SIN: {
@@ -222,6 +254,9 @@ double Expression::eval_double() {
       } case TAN: {
         return tan (m_left->eval_double()*M_PI/180);
         break;
+      } case RANDOM: {
+        srand (time(NULL));
+        return rand() % (m_left->eval_int());
       } case ASIN: {
         return asin (m_left->eval_double()) * 180 / M_PI;
         break;
@@ -251,6 +286,13 @@ double Expression::eval_double() {
 
 string Expression::eval_string() {
   if (m_kind == CONSTANT) {
+    if (m_type == INT) {
+      return to_string(eval_int());
+    } else if (m_type == DOUBLE) {
+      stringstream ss;
+      ss << eval_double();
+      return ss.str();
+    }
     assert(m_type == STRING);
     return m_string;
   } else if (m_kind == VARIABLE) {
@@ -265,8 +307,12 @@ string Expression::eval_string() {
         assert(false && "Finish this shit cracker");
     }
   }
- 
-  
+/* 
+        if (m_type == INT) {
+         int v = eval_int();
+         use to string or sprintf
+       }
+*/
   return "";
   assert(false && "WRITE THIS FUNCTION");
 }

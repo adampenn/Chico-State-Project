@@ -208,7 +208,7 @@ variable_declaration:
         if ($1 == INT) {
 	        int initial_value = 0;
 	        if ($3 != NULL) {
-            if ($3->get_type() != INT) {
+            f ($3->get_type() != INT) {
 	            //error
 	          } else {
 	            initial_value = $3->eval_int();
@@ -218,7 +218,7 @@ variable_declaration:
 	      } else if ($1 == DOUBLE) {
 	        double initial_value = 0.0;
 	        if ($3 != NULL) {
-	          if ($3->get_type() != DOUBLE) {
+	          if ($3->get_type() != DOUBLE && $3->get_type() != INT) {
 	            //error
 	          } else {
 	            initial_value = $3->eval_double();
