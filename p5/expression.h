@@ -1,6 +1,7 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 
+#include "error.h"
 #include "symbol.h"
 
 class Variable;

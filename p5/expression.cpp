@@ -31,6 +31,8 @@ Expression::Expression(string value) {
 Expression::Expression(Expression* left, Operator_type oper, Expression* right) {
   m_kind = BINARY;
   m_variable = NULL;
+  m_left = left;
+  m_right = right;
   m_oper = oper;
   if (oper == LESS_THAN || oper == GREATER_THAN || oper == GREATER_THAN_EQUAL || oper == LESS_THAN_EQUAL || oper == AND || oper == NOT || oper == OR || oper == EQUAL || oper == NOT_EQUAL || oper == TOUCHES || oper == NEAR || oper == FLOOR || oper == RANDOM) {
     m_type = INT;
@@ -58,15 +60,28 @@ Expression::Expression(Expression* left, Operator_type oper, Expression* right) 
     m_type = DOUBLE;
   } else if (oper == MULTIPLY && (left->get_type() == INT || right->get_type() == INT)) {
     m_type = INT;
+  } else if (oper == MOD && left->get_type() == DOUBLE) {
+    Error::error(Error::INVALID_LEFT_OPERAND_TYPE, operator_to_string(oper));
+    m_int = 0;
+    m_kind = CONSTANT;
+    m_type = INT;
+  } else if (oper == MOD && right->get_type() == DOUBLE) {
+    Error::error(Error::INVALID_RIGHT_OPERAND_TYPE, operator_to_string(oper));
+    m_int = 0;
+    m_kind = CONSTANT;
+    m_type = INT;
   } else if (oper == MOD && (left->get_type() == INT || right->get_type() == INT)) {
+    if (!Error::runtime() && right->eval_double() == 0) {
+      Error::error(Error::MOD_BY_ZERO_AT_PARSE_TIME);
+      m_int = 0;
+      m_kind = CONSTANT;
+    }
     m_type = INT;
   } else if (oper == UNARY_MINUS && (left->get_type() == DOUBLE || right->get_type() == DOUBLE)) {
     m_type = DOUBLE;
   } else if (oper == UNARY_MINUS && (left->get_type() == INT || right->get_type() == INT)) {
     m_type = INT;
   }
-  m_left = left;
-  m_right = right;
 }
 
 Expression::Expression(Operator_type oper, Expression* left) {
@@ -81,9 +96,7 @@ Expression::Expression(Operator_type oper, Expression* left) {
     m_type = DOUBLE;
   } else if (oper == SQRT && left->get_type() == INT) {
     m_type = INT;
-  } else if (oper == FLOOR && left->get_type() == DOUBLE) {
-    m_type = DOUBLE;
-  } else if (oper == FLOOR && left->get_type() == INT) {
+  } else if (oper == FLOOR) {
     m_type = INT;
   } else if (oper == ABS && left->get_type() == DOUBLE) {
     m_type = DOUBLE;
@@ -130,21 +143,68 @@ Gpl_type Expression::get_type() {
 }
 
 int Expression::eval_int() {
-  if (m_type != INT) {
-    cout << m_type;
-    assert(false && "Issue error here");
-  }
   if (m_kind == CONSTANT) {
     assert(m_type == INT);
     return m_int;
-  } else if (m_oper == FLOOR && m_type == DOUBLE) {
-    return (int) m_double;
   } else if (m_kind == VARIABLE) {
     return m_variable->get_int_value();
   } else if (m_kind == BINARY) {
     switch (m_oper) {
-      case EQUAL: {
-        return m_left->eval_double() == m_right->eval_double();
+      case AND: {
+        if (m_left->get_type() == DOUBLE || m_right->get_type() == DOUBLE) {
+          return m_left->eval_double() && m_right->eval_double();
+        } else if (m_left->get_type() == INT || m_right->get_type() == INT) {
+          return m_left->eval_double() && m_right->eval_double();
+        }
+      } case MOD: {
+        return m_left->eval_int() % m_right->eval_int();
+      } case GREATER_THAN_EQUAL: {
+        if (m_left->get_type() == STRING || m_right->get_type() == STRING) {
+          return m_left->eval_string() >= m_right->eval_string();
+        } else if (m_left->get_type() == DOUBLE || m_right->get_type() == DOUBLE) {
+          return m_left->eval_double() >= m_right->eval_double();
+        } else
+          return m_left->eval_int() >= m_right->eval_int();
+      } case LESS_THAN_EQUAL: {
+        if (m_left->get_type() == STRING || m_right->get_type() == STRING) {
+          return m_left->eval_string() <= m_right->eval_string();
+        } else if (m_left->get_type() == DOUBLE || m_right->get_type() == DOUBLE) {
+          return m_left->eval_double() <= m_right->eval_double();
+        } else
+          return m_left->eval_int() <= m_right->eval_int();
+      } case GREATER_THAN: {
+        if (m_left->get_type() == STRING || m_right->get_type() == STRING) {
+          return m_left->eval_string() > m_right->eval_string();
+        } else if (m_left->get_type() == DOUBLE || m_right->get_type() == DOUBLE) {
+          return m_left->eval_double() > m_right->eval_double();
+        } else
+          return m_left->eval_int() > m_right->eval_int();
+      } case LESS_THAN: {
+        if (m_left->get_type() == STRING || m_right->get_type() == STRING) {
+          return m_left->eval_string() < m_right->eval_string();
+        } else if (m_left->get_type() == DOUBLE || m_right->get_type() == DOUBLE) {
+          return m_left->eval_double() < m_right->eval_double();
+        } else
+          return m_left->eval_int() < m_right->eval_int();
+      } case NOT_EQUAL: {
+        if (m_left->get_type() == STRING || m_right->get_type() == STRING) {
+          return m_left->eval_string() != m_right->eval_string();
+        } else if (m_left->get_type() == DOUBLE || m_right->get_type() == DOUBLE) {
+          return m_left->eval_double() != m_right->eval_double();
+        } else
+          return m_left->eval_int() != m_right->eval_int();
+      } case EQUAL: {
+        if (m_left->get_type() == STRING || m_right->get_type() == STRING) {
+          return m_left->eval_string() == m_right->eval_string();
+        } else if (m_left->get_type() == DOUBLE || m_right->get_type() == DOUBLE) {
+          return m_left->eval_double() == m_right->eval_double();
+        } else
+          return m_left->eval_int() == m_right->eval_int();
+      } case OR: {
+        if (m_left->get_type() == DOUBLE || m_right->get_type() == DOUBLE) {
+          return m_left->eval_double() || m_right->eval_double();
+        } else
+          return m_left->eval_int() || m_right->eval_int();
       } case DIVIDE: {
         return m_left->eval_int() / m_right->eval_int();
         break;
@@ -161,13 +221,28 @@ int Expression::eval_int() {
     switch (m_oper) {
       case ABS: {
         return abs (m_left->eval_int());
+        break;
+      } case NOT: {
+        if (m_left->get_type() == DOUBLE) {
+          return (int) !(m_left->eval_double());
+        } else if (m_left->get_type() == INT) {
+          return !(m_left->eval_int());
+        }
+        break;
       } case RANDOM: {
-        srand (time(NULL));
+        //srand (time(NULL));
         return rand() % (m_left->eval_int());
+        break;
       } case FLOOR: {
-        return floor (m_left->eval_int());
+        if (m_left->get_type() == DOUBLE) {
+          return (int) floor(m_left->eval_double());
+        } else if (m_left->get_type() == INT) {
+          return floor(m_left->eval_int());
+        }
+        break;
       } case SQRT: {
         return sqrt (m_left->eval_int());
+        break;
       } case MINUS: {
         return -(m_left->eval_int());
         break;
@@ -208,6 +283,7 @@ int Expression::eval_int() {
 }
 
 double Expression::eval_double() {
+  // store double and strings in local var in eval int
   if (m_type == INT) {
     return eval_int();
   }
@@ -218,12 +294,8 @@ double Expression::eval_double() {
     return m_variable->get_double_value();
   } else if (m_kind == BINARY) {
     switch (m_oper) {
-      case AND: {
-        return m_left->eval_double() && m_right->eval_double();
-      } case EQUAL: {
-        return m_left->eval_double() == m_right->eval_double();
-      } case DIVIDE: {
-        return m_left->eval_double() / m_right->eval_doubel();
+      case DIVIDE: {
+        return m_left->eval_double() / m_right->eval_double();
         break;
       } case MULTIPLY: {
         return m_left->eval_double() * m_right->eval_double();
@@ -272,9 +344,6 @@ double Expression::eval_double() {
       } case ABS: {
         return abs (m_left->eval_double());
         break;
-      } case FLOOR: {
-        return floor (m_left->eval_double());
-        break;
       } default:
         return INT_MIN;
         //assert(false && "Finish this shit cracker");
@@ -285,14 +354,17 @@ double Expression::eval_double() {
 }
 
 string Expression::eval_string() {
+  if (m_type == INT) {
+    stringstream ss;
+    ss << eval_int();
+    string x = ss.str();
+    return ss.str();
+  } else if (m_type == DOUBLE) {
+    stringstream ss;
+    ss << eval_double();
+    return ss.str();
+  } 
   if (m_kind == CONSTANT) {
-    if (m_type == INT) {
-      return to_string(eval_int());
-    } else if (m_type == DOUBLE) {
-      stringstream ss;
-      ss << eval_double();
-      return ss.str();
-    }
     assert(m_type == STRING);
     return m_string;
   } else if (m_kind == VARIABLE) {

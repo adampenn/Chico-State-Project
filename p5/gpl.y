@@ -1,3 +1,5 @@
+
+
 /*
 
   This file contains the input to the bison compiler generator.
@@ -23,6 +25,42 @@ using namespace std;
 Symbol_table* table = Symbol_table::instance();
 
 // bison syntax to indicate the end of the header
+
+// Error checking
+
+Expression* create_binary_expression(Expression *left,
+                               Operator_type oper,
+                               Expression *right,
+                               int legal_left,
+                               int legal_right
+                              ) {
+  if (!(left->get_type() & legal_left) || !(right->get_type() & legal_right)) {
+    if (!(left->get_type() & legal_left)) {
+      Error::error(Error::INVALID_LEFT_OPERAND_TYPE, operator_to_string(oper));
+    }
+    if (!(right->get_type() & legal_right)) {
+      Error::error(Error::INVALID_RIGHT_OPERAND_TYPE, operator_to_string(oper));
+    }
+    return new Expression(0);
+  } else {
+    return new Expression(left, oper, right);
+  }
+}
+
+Expression* create_unary_expression(Expression *left,
+                               Operator_type oper,
+                               int legal_left
+                              ) {
+  if (!(left->get_type() & legal_left)) {
+    if (!(left->get_type() & legal_left)) {
+      Error::error(Error::INVALID_RIGHT_OPERAND_TYPE, operator_to_string(oper));
+    }
+    return new Expression(0);
+  } else {
+    return new Expression(oper, left);
+  }
+}
+
 %} 
 
 // The union is used to declare the variable yylval which is used to
@@ -203,13 +241,14 @@ declaration:
 variable_declaration:
     simple_type  T_ID  optional_initializer
     {
+      Expression *expression = $3;
       Symbol* symbol;
       if (table->lookup(*$2) == NULL) {
         if ($1 == INT) {
 	        int initial_value = 0;
 	        if ($3 != NULL) {
-            f ($3->get_type() != INT) {
-	            //error
+            if ($3->get_type() != INT) {
+	            Error::error(Error::INVALID_TYPE_FOR_INITIAL_VALUE, gpl_type_to_string(expression->get_type()), *$2, "int");
 	          } else {
 	            initial_value = $3->eval_int();
 	          }
@@ -218,8 +257,8 @@ variable_declaration:
 	      } else if ($1 == DOUBLE) {
 	        double initial_value = 0.0;
 	        if ($3 != NULL) {
-	          if ($3->get_type() != DOUBLE && $3->get_type() != INT) {
-	            //error
+	          if ($3->get_type() == STRING) {
+	            Error::error(Error::INVALID_TYPE_FOR_INITIAL_VALUE, gpl_type_to_string(expression->get_type()), *$2, "double");
 	          } else {
 	            initial_value = $3->eval_double();
 	          }
@@ -228,11 +267,7 @@ variable_declaration:
         } else if ($1 == STRING) {
 	        string initial_value = "";
 	        if ($3 != NULL) {
-	          if ($3->get_type() != STRING) {
-	            //error
-	          } else {
-	            initial_value = $3->eval_string();
-	          }
+	          initial_value = $3->eval_string();
 	        }
           symbol = new Symbol(*$2, initial_value);
         }
@@ -483,13 +518,16 @@ variable:
     }
     | T_ID T_LBRACKET expression T_RBRACKET
     {
-//     lookup $1 in s table
-//      if not in tere --> undeclared
-//      if in there but not an array -> not an array error
-      
       Symbol* symbol = table->lookup(*$1);
-      if (symbol != NULL) {
-        $$ = new Variable(symbol, $3);
+      if (symbol == NULL) {
+        // Error, UNDECALRED
+      } else {
+        /*
+        if (symbol->get_type() != //put array here) {
+        } else {
+          $$ = new Variable(symbol, $3);
+        }
+        */
       }
     }
     | T_ID T_PERIOD T_ID
@@ -510,97 +548,161 @@ expression:
     }
     | expression T_OR expression
     {
-      $$ = new Expression($1, OR, $3);
+      $$ = create_binary_expression(
+                                    $1,
+                                    OR,
+                                    $3,
+                                    INT | DOUBLE,
+                                    INT | DOUBLE
+                                   );
     }
     | expression T_AND expression
     {
-      $$ = new Expression($1, AND, $3);
+      $$ = create_binary_expression(
+                                    $1,
+                                    AND,
+                                    $3,
+                                    INT | DOUBLE,
+                                    INT | DOUBLE
+                                   );
     }
     | expression T_LESS_EQUAL expression
     {
-      $$ = new Expression($1, LESS_THAN_EQUAL, $3);
+      $$ = create_binary_expression(
+                                    $1,
+                                    LESS_THAN_EQUAL,
+                                    $3,
+                                    INT | DOUBLE | STRING,
+                                    INT | DOUBLE | STRING
+                                   );
     }
     | expression T_GREATER_EQUAL  expression
     {
-      $$ = new Expression($1, GREATER_THAN_EQUAL, $3);
+      $$ = create_binary_expression(
+                                    $1,
+                                    GREATER_THAN_EQUAL,
+                                    $3,
+                                    INT | DOUBLE | STRING,
+                                    INT | DOUBLE | STRING
+                                   );
     }
     | expression T_LESS expression
     {
-      $$ = new Expression($1, LESS_THAN, $3);
+      $$ = create_binary_expression(
+                                    $1,
+                                    LESS_THAN,
+                                    $3,
+                                    INT | DOUBLE | STRING,
+                                    INT | DOUBLE | STRING
+                                   );
     }
     | expression T_GREATER  expression
     {
-      $$ = new Expression($1, GREATER_THAN, $3);
+      $$ = create_binary_expression(
+                                    $1,
+                                    GREATER_THAN,
+                                    $3,
+                                    INT | DOUBLE | STRING,
+                                    INT | DOUBLE | STRING
+                                   );
     }
     | expression T_EQUAL expression
     {
-      $$ = new Expression($1, EQUAL, $3);
+      $$ = create_binary_expression(
+                                    $1,
+                                    EQUAL,
+                                    $3,
+                                    INT | DOUBLE | STRING,
+                                    INT | DOUBLE | STRING
+                                   );
     }
     | expression T_NOT_EQUAL expression
     {
-      $$ = new Expression($1, NOT_EQUAL, $3);
+      $$ = create_binary_expression(
+                                    $1,
+                                    NOT_EQUAL,
+                                    $3,
+                                    INT | DOUBLE | STRING,
+                                    INT | DOUBLE | STRING
+                                   );
     }
     | expression T_PLUS expression
     {
-      $$ = new Expression($1, PLUS, $3);
+      $$ = create_binary_expression(
+                                    $1,
+                                    PLUS,
+                                    $3,
+                                    INT | DOUBLE | STRING,
+                                    INT | DOUBLE | STRING
+                                   );
     }
     | expression T_MINUS expression
     {
-      if ($1->get_type() == STRING || $3->get_type() == STRING) {
-        //error
-	      $$ = new Expression(0);
-      } else {
-       $$ = new Expression($1, MINUS, $3);
-      }
+      $$ = create_binary_expression(
+                                    $1,
+                                    MINUS,
+                                    $3,
+                                    INT | DOUBLE,
+                                    INT | DOUBLE
+                                   );
     }
     | expression T_ASTERISK expression
     {
-      if ($1->get_type() == STRING || $3->get_type() == STRING) {
-        //error
-        assert(false && "MULTIPLY GPL.Y");
-	      $$ = new Expression(0);
-      } else {
-       $$ = new Expression($1, MULTIPLY, $3);
-      }
+      $$ = create_binary_expression(
+                                    $1,
+                                    MULTIPLY,
+                                    $3,
+                                    INT | DOUBLE,
+                                    INT | DOUBLE
+                                   );
     }
     | expression T_DIVIDE expression
     {
-      if ($1->get_type() == STRING || $3->get_type() == STRING) {
-        //error
-	      $$ = new Expression(0);
-      } else {
-        $$ = new Expression($1, DIVIDE, $3);
-      }
+      $$ = create_binary_expression(
+                                    $1,
+                                    DIVIDE,
+                                    $3,
+                                    INT | DOUBLE,
+                                    INT | DOUBLE
+                                   );
     }
     | expression T_MOD expression
     {
-      if ($1->get_type() == STRING || $3->get_type() == STRING) {
-        //error
-	      $$ = new Expression(0);
-      } else {
-        $$ = new Expression($1, MOD, $3);
-      }
+      $$ = create_binary_expression(
+                                    $1,
+                                    MOD,
+                                    $3,
+                                    INT | DOUBLE,
+                                    INT | DOUBLE
+                                   );
     }
     | T_MINUS expression %prec UNARY_OPS
     {
-      $$ = new Expression(MINUS, $2);
+      $$ = create_unary_expression(
+                                    $2,
+                                    MINUS,
+                                    INT | DOUBLE
+                                   );
     }
     | T_NOT expression %prec UNARY_OPS
     {
-      $$ = new Expression(NOT, $2);
+      $$ = create_unary_expression(
+                                    $2,
+                                    NOT,
+                                    INT | DOUBLE
+                                   );
     }
     | math_operator T_LPAREN expression T_RPAREN
     {
-      if ($3->get_type() == STRING){
-        //error
-      	$$ = new Expression(0);
-      } else {
-        $$ = new Expression($1, $3);
-      }
+      $$ = create_unary_expression(
+                                    $3,
+                                    $1,
+                                    INT | DOUBLE
+                                   );
     }
     | variable geometric_operator variable
     {
-
+      assert(false && "P6");
     }
     ;
 
