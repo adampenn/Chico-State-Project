@@ -280,29 +280,30 @@ variable_declaration:
     {
       Symbol* symbol;
       if (table->lookup(*$2) == NULL) {
-        if ($1 == INT) {
-      	  if ($4->get_type() != INT) {
-	          Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, *$2);
-	        } else {
-	          int size = $4->eval_int();
-	          symbol = new Symbol(*$2, size, INT_ARRAY);
-	        }
-	      } else if ( $1 == DOUBLE) {
-          if ($4->get_type() != INT) {
-	          Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, *$2);
-	        } else {
-	          int size = $4->eval_int();
-            symbol = new Symbol(*$2, size, DOUBLE_ARRAY);
-	        }
-	      } else if ($1 == STRING) {
-	        if ($4->get_type() != INT) {
-	          Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, *$2);
-	        } else {
-	          int size = $4->eval_int();
-            symbol = new Symbol(*$2, size, STRING_ARRAY);
-	        }
+    	  if ($4->get_type() != INT) {
+          stringstream ss;
+          if ($4->get_type() == DOUBLE) {
+            ss << $4->eval_double();
+	          Error::error(Error::INVALID_ARRAY_SIZE, *$2, ss.str());
+          } else if ( $4->get_type() == STRING) {
+            ss << $4->eval_string();
+	          Error::error(Error::INVALID_ARRAY_SIZE, *$2, ss.str());
+          }
+	      } else {
+          int size = $4->eval_int();
+          if ($4->eval_int() != 0) {
+            if ($1 == INT) {
+	            symbol = new Symbol(*$2, size, INT_ARRAY);
+	          } else if ( $1 == DOUBLE) {
+              symbol = new Symbol(*$2, size, DOUBLE_ARRAY);
+	          } else if ($1 == STRING) {
+              symbol = new Symbol(*$2, size, STRING_ARRAY);
+            }
+	          table->insert(*$2, symbol);
+          } else {
+	          Error::error(Error::INVALID_ARRAY_SIZE, *$2, "0");
+          }
         }
-	      table->insert(*$2, symbol);
       } else {
         Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$2);
       }
@@ -514,6 +515,8 @@ variable:
       Symbol* symbol = table->lookup(*$1);
       if (symbol != NULL) {
         $$ = new Variable(symbol);
+      } else {
+        Error::error(Error::UNDECLARED_VARIABLE, *$1);
       }
     }
     | T_ID T_LBRACKET expression T_RBRACKET
@@ -522,12 +525,11 @@ variable:
       if (symbol == NULL) {
         // Error, UNDECALRED
       } else {
-        /*
-        if (symbol->get_type() != //put array here) {
+        if (!(symbol->get_type() & ARRAY)) {
+          //error
         } else {
           $$ = new Variable(symbol, $3);
         }
-        */
       }
     }
     | T_ID T_PERIOD T_ID
@@ -672,8 +674,8 @@ expression:
                                     $1,
                                     MOD,
                                     $3,
-                                    INT | DOUBLE,
-                                    INT | DOUBLE
+                                    INT,
+                                    INT
                                    );
     }
     | T_MINUS expression %prec UNARY_OPS
@@ -713,7 +715,8 @@ primary_expression:
       $$ = $2;
     }
     | variable
-    {
+    { 
+      
       $$ = new Expression($1);
     }
     | T_INT_CONSTANT

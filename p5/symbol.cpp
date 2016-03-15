@@ -7,17 +7,17 @@ Symbol::Symbol(string name, int size, Gpl_type type){
   if (type == INT_ARRAY) {
     m_value = new int[size];
     for (int i=0; i < m_size; i++) {
-      ((int*)m_value)[i] = 42;
+      ((int*)m_value)[i] = 0;
     }
   } else if (type == DOUBLE_ARRAY) {
     m_value = new double[size];
     for (int i=0; i < m_size; i++) {
-      ((double*)m_value)[i] = 3.14159;
+      ((double*)m_value)[i] = 0.0;
     }
   } else if (type == STRING_ARRAY) {
     m_value = new string[size];
     for (int i=0; i < m_size; i++) {
-      ((string*)m_value)[i] = "Hello world";
+      ((string*)m_value)[i] = "";
     }
   }
 }

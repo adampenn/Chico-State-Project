@@ -1,1 +1,2 @@
-Semantic error on line 4: Invalid left operand for operator '!'.
+Semantic error on line 1: Variable 'i' was not declared before it was used.
+Semantic error on line 1: Invalid left operand for operator '*'.

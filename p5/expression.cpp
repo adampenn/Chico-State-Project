@@ -36,12 +36,6 @@ Expression::Expression(Expression* left, Operator_type oper, Expression* right) 
   m_oper = oper;
   if (oper == LESS_THAN || oper == GREATER_THAN || oper == GREATER_THAN_EQUAL || oper == LESS_THAN_EQUAL || oper == AND || oper == NOT || oper == OR || oper == EQUAL || oper == NOT_EQUAL || oper == TOUCHES || oper == NEAR || oper == FLOOR || oper == RANDOM) {
     m_type = INT;
-  } else if (oper == ABS && (left->get_type() == DOUBLE || right->get_type() == DOUBLE)) {
-    m_type = DOUBLE;
-  } else if (oper == ABS && (left->get_type() == INT || right->get_type() == INT)) {
-    m_type = INT;
-  } else if (oper == SIN || oper == COS || oper == TAN || oper == ASIN || oper == ACOS || oper == ATAN) {
-    m_type = DOUBLE;
   } else if (oper == PLUS && (left->get_type() == STRING || right->get_type() == STRING)) {
     m_type = STRING;
   } else if (oper == PLUS && (left->get_type() == DOUBLE || right->get_type() == DOUBLE)) {
@@ -53,24 +47,24 @@ Expression::Expression(Expression* left, Operator_type oper, Expression* right) 
   } else if (oper == MINUS && (left->get_type() == INT || right->get_type() == INT)) {
     m_type = INT;
   } else if (oper == DIVIDE && (left->get_type() == DOUBLE || right->get_type() == DOUBLE)) {
+    if (!Error::runtime() && right->eval_double() == 0) {
+      Error::error(Error::DIVIDE_BY_ZERO_AT_PARSE_TIME);
+      m_double = 0;
+      m_kind = CONSTANT;
+    }
     m_type = DOUBLE;
   } else if (oper == DIVIDE && (left->get_type() == INT || right->get_type() == INT)) {
+    if (!Error::runtime() && right->eval_double() == 0) {
+      Error::error(Error::DIVIDE_BY_ZERO_AT_PARSE_TIME);
+      m_int = 0;
+      m_kind = CONSTANT;
+    }
     m_type = INT;
   } else if (oper == MULTIPLY && (left->get_type() == DOUBLE || right->get_type() == DOUBLE)) {
     m_type = DOUBLE;
   } else if (oper == MULTIPLY && (left->get_type() == INT || right->get_type() == INT)) {
     m_type = INT;
-  } else if (oper == MOD && left->get_type() == DOUBLE) {
-    Error::error(Error::INVALID_LEFT_OPERAND_TYPE, operator_to_string(oper));
-    m_int = 0;
-    m_kind = CONSTANT;
-    m_type = INT;
-  } else if (oper == MOD && right->get_type() == DOUBLE) {
-    Error::error(Error::INVALID_RIGHT_OPERAND_TYPE, operator_to_string(oper));
-    m_int = 0;
-    m_kind = CONSTANT;
-    m_type = INT;
-  } else if (oper == MOD && (left->get_type() == INT || right->get_type() == INT)) {
+  } else if (oper == MOD && (m_left->get_type() == INT && m_right->get_type() == INT)) {
     if (!Error::runtime() && right->eval_double() == 0) {
       Error::error(Error::MOD_BY_ZERO_AT_PARSE_TIME);
       m_int = 0;
@@ -94,8 +88,6 @@ Expression::Expression(Operator_type oper, Expression* left) {
     m_type = INT;
   } else if (oper == SQRT && left->get_type() == DOUBLE) {
     m_type = DOUBLE;
-  } else if (oper == SQRT && left->get_type() == INT) {
-    m_type = INT;
   } else if (oper == FLOOR) {
     m_type = INT;
   } else if (oper == ABS && left->get_type() == DOUBLE) {
@@ -211,16 +203,21 @@ int Expression::eval_int() {
       } case MULTIPLY: {
         return m_left->eval_int() * m_right->eval_int();
         break;
+      } case MINUS: {
+        return m_left->eval_int() - m_right->eval_int();
+        break;
       } case PLUS: {
         return m_left->eval_int() + m_right->eval_int();
         break;
-      } default:
+      } default: {
+        cout << m_oper << endl;
         assert(false && "Finish this shit cracker");
+      }
     }
   } else if (m_kind == UNARY) {
     switch (m_oper) {
       case ABS: {
-        return abs (m_left->eval_int());
+        return std::abs (m_left->eval_int());
         break;
       } case NOT: {
         if (m_left->get_type() == DOUBLE) {
@@ -230,7 +227,6 @@ int Expression::eval_int() {
         }
         break;
       } case RANDOM: {
-        //srand (time(NULL));
         return rand() % (m_left->eval_int());
         break;
       } case FLOOR: {
@@ -241,7 +237,7 @@ int Expression::eval_int() {
         }
         break;
       } case SQRT: {
-        return sqrt (m_left->eval_int());
+        return std::sqrt (m_left->eval_int());
         break;
       } case MINUS: {
         return -(m_left->eval_int());
@@ -250,35 +246,7 @@ int Expression::eval_int() {
         assert(false && "Finish this shit cracker");
     }
   }
-  
-  /*
-    what type of node are we - int, double, string, var, unary, binary
-      -make type for this - assert for that
-      int return
-      variable return get int
-      binary evaluate left and right
-      unary evaluate 
-    switch on m_oper
-      case PLUS
-        int left_value = m_left->eval_int()
-        int right_value = m_right->eval_int()
-        return left_val + right_val;
-      case greater_than
-        check to see what type
-        int left_value = m_left->eval_string()
-        int right_value = m_right->eval_string() 
-        return left_vale > right_val
-
-
-     eval_string() {
-       if (m_type == INT) {
-         int v = eval_int();
-         use to string or sprintf
-       }
-     }
-  */
   assert(m_type == INT);
-  assert(false && "WRITE THIS FUNCTION");
   return INT_MIN;
 }
 
@@ -339,10 +307,10 @@ double Expression::eval_double() {
         return atan (m_left->eval_double()) * 180 / M_PI;
         break;
       } case SQRT: {
-        return sqrt (m_left->eval_double());
+        return std::sqrt (m_left->eval_double());
         break;
       } case ABS: {
-        return abs (m_left->eval_double());
+        return std::abs (m_left->eval_double());
         break;
       } default:
         return INT_MIN;

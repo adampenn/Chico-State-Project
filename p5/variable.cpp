@@ -2,6 +2,7 @@
 
 Variable::Variable(Symbol* symbol) {
   m_symbol = symbol;
+  m_expr = NULL;
   m_type = m_symbol->get_base_type();
 }
 
@@ -16,29 +17,29 @@ Gpl_type Variable::get_type() {
 }
 
 int Variable::get_int_value() {
-  if (get_type() == INT_ARRAY) {
-    
+  if (m_expr != NULL) {
+     return m_symbol->get_int_value(m_expr->eval_int());
   }
-  else if (get_type() == INT) {
+  else {
     return m_symbol->get_int_value();
   }
   return INT_MIN;
 }
 
 double Variable::get_double_value() {
-  if (get_type() == DOUBLE_ARRAY) {
-    
+  if (m_expr != NULL) {
+     return m_symbol->get_double_value(m_expr->eval_int());
   }
-  else if (get_type() == DOUBLE) {
+  else {
     return m_symbol->get_double_value();
   }
 }
 
 string Variable::get_string_value() {
-  if (get_type() == STRING_ARRAY) {
-    
+  if (m_expr != NULL) {
+     return m_symbol->get_string_value(m_expr->eval_int());
   }
-  else if (get_type() == STRING) {
+  else {
     return m_symbol->get_string_value();
   }
 }
