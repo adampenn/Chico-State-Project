@@ -1,4 +1,13 @@
+/* ASK TYSON:
 
+   t106
+     could fix by saying if ! NO_TYPE before issuing
+     invalid left operand error
+   t120
+     Fixed by saying if ! NO_TYPE before issuing invalid
+     init type error
+
+*/
 
 /*
 
@@ -247,11 +256,13 @@ variable_declaration:
         if ($1 == INT) {
 	        int initial_value = 0;
 	        if ($3 != NULL) {
-            if ($3->get_type() != INT) {
-	            Error::error(Error::INVALID_TYPE_FOR_INITIAL_VALUE, gpl_type_to_string(expression->get_type()), *$2, "int");
-	          } else {
-	            initial_value = $3->eval_int();
-	          }
+	          if ($3->get_type() != NO_TYPE) {
+              if ($3->get_type() != INT) {
+                Error::error(Error::INVALID_TYPE_FOR_INITIAL_VALUE, gpl_type_to_string(expression->get_type()), *$2, "int");
+	            } else {
+	              initial_value = $3->eval_int();
+	            }
+            }
 	        }
 	        symbol = new Symbol(*$2, initial_value);
 	      } else if ($1 == DOUBLE) {
@@ -517,16 +528,18 @@ variable:
         $$ = new Variable(symbol);
       } else {
         Error::error(Error::UNDECLARED_VARIABLE, *$1);
+        $$ = new Variable(0);
       }
     }
     | T_ID T_LBRACKET expression T_RBRACKET
     {
       Symbol* symbol = table->lookup(*$1);
       if (symbol == NULL) {
-        // Error, UNDECALRED
+       Error::error(Error::UNDECLARED_VARIABLE, *$1);
       } else {
         if (!(symbol->get_type() & ARRAY)) {
-          //error
+	        Error::error(Error::VARIABLE_NOT_AN_ARRAY, *$1);
+          $$ = new Variable(symbol);
         } else {
           $$ = new Variable(symbol, $3);
         }

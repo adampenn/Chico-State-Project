@@ -7,6 +7,7 @@ class Expression;
 
 class Variable {
   public:
+    Variable(int empty);
     Variable(Symbol* symbol);
     Variable(Symbol* symbol, Expression* expr);
     Gpl_type get_type();

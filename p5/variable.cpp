@@ -1,5 +1,11 @@
 #include "variable.h"
 
+Variable::Variable(int empty) {
+  m_symbol = NULL;
+  m_expr = NULL;
+  m_type = NO_TYPE;
+}
+
 Variable::Variable(Symbol* symbol) {
   m_symbol = symbol;
   m_expr = NULL;
