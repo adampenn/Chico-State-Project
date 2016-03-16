@@ -1,1 +1,1 @@
-Semantic error on line 3: array is not a legal array index. The array is '3.4'.
+Semantic error on line 1: Incorrect type for initial value of variable 'double'.
