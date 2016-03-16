@@ -18,7 +18,14 @@ Gpl_type Variable::get_type() {
 
 int Variable::get_int_value() {
   if (m_expr != NULL) {
-     return m_symbol->get_int_value(m_expr->eval_int());
+    stringstream ss;
+    if (m_expr->get_type() == DOUBLE) {
+	    Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, m_symbol->get_name(), "A double expression");
+    } else if (m_expr->get_type() == STRING) {
+	    Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, m_symbol->get_name(), "A string expression");
+    } else {
+      return m_symbol->get_int_value(m_expr->eval_int());
+    }
   }
   else {
     return m_symbol->get_int_value();

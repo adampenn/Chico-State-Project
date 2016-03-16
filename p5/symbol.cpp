@@ -44,6 +44,10 @@ Gpl_type Symbol::get_type(){
   return m_type;
 }
 
+string Symbol::get_name() const{
+  return m_name;
+}
+
 Gpl_type Symbol::get_base_type(){
   if (m_type == INT || m_type == INT_ARRAY) {
     return INT;
@@ -92,7 +96,14 @@ int Symbol::get_int_value(int index) const{
     return *((int *) m_value);
   } else {
     assert(m_type == INT_ARRAY);
-    return ((int *)m_value)[index];
+    if (index > m_size) {
+      stringstream ss;
+      ss << index;
+	    Error::error(Error::ARRAY_INDEX_OUT_OF_BOUNDS, m_name, ss.str());
+      return INT_MIN;
+    } else {
+      return ((int *)m_value)[index];
+    }
   }
 }
 
@@ -101,8 +112,15 @@ double Symbol::get_double_value(int index) const{
     assert(m_type == DOUBLE);
     return *((double *)m_value);
   } else {
-    assert(m_type == DOUBLE_ARRAY);
-    return ((double *)m_value)[index];
+    if (index > m_size) {
+      stringstream ss;
+      ss << index;
+	    Error::error(Error::ARRAY_INDEX_OUT_OF_BOUNDS, m_name, ss.str());
+      return INT_MIN;
+    } else {
+      assert(m_type == DOUBLE_ARRAY);
+      return ((double *)m_value)[index];
+    }
   }
 }
 
@@ -111,8 +129,15 @@ string Symbol::get_string_value(int index) const{
     assert(m_type == STRING);
     return *((string *)m_value);
   } else {
-    assert(m_type == STRING_ARRAY);
-    return ((string *)m_value)[index];
+    if (index > m_size) {
+      stringstream ss;
+      ss << index;
+	    Error::error(Error::ARRAY_INDEX_OUT_OF_BOUNDS, m_name, ss.str());
+      return "";
+    } else {
+      assert(m_type == STRING_ARRAY);
+      return ((string *)m_value)[index];
+    }
   }  
 }
 

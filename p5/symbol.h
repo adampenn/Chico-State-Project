@@ -6,6 +6,7 @@
 #include "gpl_assert.h"
 #include "gpl_type.h"
 #include "limits.h"
+#include "error.h"
 #include <sstream>
 
 using std::stringstream;
@@ -37,6 +38,7 @@ class Symbol {
     int get_int_value(int index = UNDEFINED_INDEX) const;
     double get_double_value(int index = UNDEFINED_INDEX) const;
     string get_string_value(int index = UNDEFINED_INDEX) const;
+    string get_name() const;
     void print(ostream &os);
   
   private:
