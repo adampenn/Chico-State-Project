@@ -528,7 +528,7 @@ variable:
         $$ = new Variable(symbol);
       } else {
         Error::error(Error::UNDECLARED_VARIABLE, *$1);
-        $$ = new Variable(0);
+        $$ = new Variable(new Symbol(*$1, 0));
       }
     }
     | T_ID T_LBRACKET expression T_RBRACKET
