@@ -378,28 +378,39 @@ object_declaration:
     | object_type T_ID T_LBRACKET expression T_RBRACKET
     {
       int size = $4->eval_int();
-    m_value = new int[size];
-    for (int i=0; i < m_size; i++) {
-      ((int*)m_value)[i] = 0;
-    }
-      // WHAT TYPE should this array be?
-      cur_object_under_construction = new Game_object
+      switch ($1) {
+        case T_TRIANGLE:
+          cur_object_under_construction = new Triangle[size];
+          break;
+        case T_PIXMAP:
+          cur_object_under_construction = new Pixmap[size];
+          break;
+        case T_CIRCLE:
+          cur_object_under_construction = new Circle[size];
+          break;
+        case T_RECTANGLE:
+          cur_object_under_construction = new Rectangle[size];
+          break;
+        case T_TEXTBOX:
+          cur_object_under_construction = new Textbox[size];
+          break;
+      }
       for (int i = 0; i < size; i++) {
         switch ($1) {
           case T_TRIANGLE:
-            array[i] = new Triangle();
+            cur_object_under_construction[i] = new Triangle();
             break;
           case T_PIXMAP:
-            cur_object_under_construction = new Pixmap();
+            cur_object_under_construction[i] = new Pixmap();
             break;
           case T_CIRCLE:
-            cur_object_under_construction = new Circle();
+            cur_object_under_construction[i] = new Circle();
             break;
           case T_RECTANGLE:
-            cur_object_under_construction = new Rectangle();
+            cur_object_under_construction[i] = new Rectangle();
             break;
           case T_TEXTBOX:
-            cur_object_under_construction = new Textbox();
+            cur_object_under_construction[i] = new Textbox();
             break;
         } 
       }
@@ -409,10 +420,25 @@ object_declaration:
 //---------------------------------------------------------------------
 object_type:
     T_TRIANGLE
+    {
+      $$ = T_TRIANGLE;
+    }
     | T_PIXMAP
+    {
+      $$ = T_PIXMAP;
+    }
     | T_CIRCLE
+    {
+      $$ = T_CIRCLE;
+    }
     | T_RECTANGLE
+    {
+      $$ = T_RECTANGLE;
+    }
     | T_TEXTBOX
+    {
+      $$ = T_TEXTBOX;
+    }
     ;
 
 //---------------------------------------------------------------------

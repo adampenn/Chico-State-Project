@@ -27,6 +27,15 @@ Symbol::Symbol(string name, int size, Gpl_type type){
     for (int i=0; i < m_size; i++) {
       ((string*)m_value)[i] = "";
     }
+  } else if (type & GAME_OBJECT) {
+    switch (type) {
+      case CIRCLE:
+        m_value = new Circle[size];
+        for (int i = 0; i < size; i++) {
+          ((Circle*)m_value[i] = 
+        }
+        break;
+    }
   }
   m_game_object = NULL;
 }
