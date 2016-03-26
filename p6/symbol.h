@@ -7,6 +7,11 @@
 #include "gpl_type.h"
 #include "limits.h"
 #include "error.h"
+#include "circle.h"
+#include "rectangle.h"
+#include "pixmap.h"
+#include "textbox.h"
+#include "triangle.h"
 #include <sstream>
 
 using std::stringstream;
@@ -42,13 +47,13 @@ class Symbol {
     Game_object* get_game_object_value() const;
     string get_name() const;
     void print(ostream &os);
-  
+    bool is_game_object();  
   private:
     string m_name;
     void* m_value;
     int m_size;
-    Gpl_type m_type;
     Game_object* m_game_object;
+    Gpl_type m_type;
 };
 
 

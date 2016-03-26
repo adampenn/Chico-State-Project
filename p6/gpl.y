@@ -32,6 +32,7 @@ extern int line_count;            // current line in the input; from record.l
 #include <string>
 using namespace std;
 Symbol_table* table = Symbol_table::instance();
+Game_object* cur_object_under_construction = NULL;
 
 // bison syntax to indicate the end of the header
 
@@ -195,16 +196,17 @@ Expression* create_unary_expression(Expression *left,
 %token T_LKEY                "lkey"
 %token T_WKEY                "wkey"
 
-%token <union_string> 	T_ID              "identifier"
-%token <union_int> 	T_INT_CONSTANT    "int constant"
-%token <union_double> 	T_DOUBLE_CONSTANT "double constant"
-%token <union_string> 	T_STRING_CONSTANT "string constant"
-%type <union_gpl_type>	simple_type
-%type <union_expression> expression
-%type <union_expression> primary_expression
-%type <union_expression> optional_initializer
-%type <union_variable>	variable
-%type <union_operator>	math_operator
+%token <union_string>   	T_ID              "identifier"
+%token <union_int>      	T_INT_CONSTANT    "int constant"
+%token <union_double>   	T_DOUBLE_CONSTANT "double constant"
+%token <union_string> 	  T_STRING_CONSTANT "string constant"
+%type <union_gpl_type>	  simple_type
+%type <union_int>	        object_type
+%type <union_expression>  expression
+%type <union_expression>  primary_expression
+%type <union_expression>  optional_initializer
+%type <union_variable>	  variable
+%type <union_operator>	  math_operator
 
 
 // special token that does not match any production
@@ -353,66 +355,62 @@ optional_initializer:
 object_declaration:
     object_type T_ID
     {
-      switch ($1) {
-        case T_TRIANGLE:
-          cur_object_under_construction = new Triangle();
-          break;
-        case T_PIXMAP:
-          cur_object_under_construction = new Pixmap();
-          break;
-        case T_CIRCLE:
-          cur_object_under_construction = new Circle();
-          break;
-        case T_RECTANGLE:
-          cur_object_under_construction = new Rectangle();
-          break;
-        case T_TEXTBOX:
-          cur_object_under_construction = new Textbox();
-          break;
-      } 
+      Symbol* symbol = table->lookup(*$2);
+      if (symbol == NULL) {
+        switch ($1) {
+          case T_TRIANGLE: {
+            cur_object_under_construction = new Triangle();
+            break;
+          } case T_PIXMAP: {
+            cur_object_under_construction = new Pixmap();
+            break;
+          } case T_CIRCLE: {
+            cur_object_under_construction = new Circle();
+            break;
+          } case T_RECTANGLE: {
+            cur_object_under_construction = new Rectangle();
+            break;
+          } case T_TEXTBOX: {
+            cur_object_under_construction = new Textbox();
+            break;
+          }
+        }
+        symbol = new Symbol(*$2, cur_object_under_construction);
+        table->insert(*$2, symbol);
+      } else {
+        Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$2);
+      }
     }
     T_LPAREN parameter_list_or_empty T_RPAREN
     {
-      
+      cur_object_under_construction = NULL;
     }
     | object_type T_ID T_LBRACKET expression T_RBRACKET
     {
-      int size = $4->eval_int();
-      switch ($1) {
-        case T_TRIANGLE:
-          cur_object_under_construction = new Triangle[size];
-          break;
-        case T_PIXMAP:
-          cur_object_under_construction = new Pixmap[size];
-          break;
-        case T_CIRCLE:
-          cur_object_under_construction = new Circle[size];
-          break;
-        case T_RECTANGLE:
-          cur_object_under_construction = new Rectangle[size];
-          break;
-        case T_TEXTBOX:
-          cur_object_under_construction = new Textbox[size];
-          break;
-      }
-      for (int i = 0; i < size; i++) {
+      Symbol* symbol = table->lookup(*$2);
+      if (symbol == NULL) {
+        int size = $4->eval_int();
         switch ($1) {
           case T_TRIANGLE:
-            cur_object_under_construction[i] = new Triangle();
+	          symbol = new Symbol(*$2, size, TRIANGLE);
             break;
           case T_PIXMAP:
-            cur_object_under_construction[i] = new Pixmap();
+	          symbol = new Symbol(*$2, size, PIXMAP);
             break;
           case T_CIRCLE:
-            cur_object_under_construction[i] = new Circle();
+	          symbol = new Symbol(*$2, size, CIRCLE);
             break;
           case T_RECTANGLE:
-            cur_object_under_construction[i] = new Rectangle();
+	          symbol = new Symbol(*$2, size, RECTANGLE);
             break;
           case T_TEXTBOX:
-            cur_object_under_construction[i] = new Textbox();
+	          symbol = new Symbol(*$2, size, TEXTBOX);
             break;
-        } 
+        }
+        table->insert(*$2, symbol);
+        cur_object_under_construction = NULL;
+      } else {
+        Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$2);
       }
     }
     ;
@@ -444,18 +442,61 @@ object_type:
 //---------------------------------------------------------------------
 parameter_list_or_empty :
     parameter_list
+    {
+      //$$ = $1;
+    }
     | empty
+    {
+      //$$ = $1;
+    }
     ;
 
 //---------------------------------------------------------------------
 parameter_list :
     parameter_list T_COMMA parameter
+    { 
+      //$$ = $3;
+    }
     | parameter
+    {
+      //$$ = $1
+    }
     ;
 
 //---------------------------------------------------------------------
 parameter:
     T_ID T_ASSIGN expression
+    {
+      Gpl_type type = $3->get_type();
+      if (type == INT) {
+        switch (cur_object_under_construction->set_member_variable(*$1, $3->eval_int())) {
+          case MEMBER_NOT_OF_GIVEN_TYPE:
+            assert(false && "MEMBER NOT OF GIVEN TYPE ERROR");
+            break;
+          case MEMBER_NOT_DECLARED:
+            assert(false && "MEMBER NOT DECLARED");
+            break;
+        }
+      } else if (type == DOUBLE) {
+        switch (cur_object_under_construction->set_member_variable(*$1, $3->eval_double())) {
+          case MEMBER_NOT_OF_GIVEN_TYPE:
+            assert(false && "MEMBER NOT OF GIVEN TYPE ERROR");
+            break;
+          case MEMBER_NOT_DECLARED:
+            assert(false && "MEMBER NOT DECLARED");
+            break;
+        }
+      } else if (type == STRING) {
+        switch (cur_object_under_construction->set_member_variable(*$1, $3->eval_string())) {
+          case MEMBER_NOT_OF_GIVEN_TYPE:
+            assert(false && "MEMBER NOT OF GIVEN TYPE ERROR");
+            break;
+          case MEMBER_NOT_DECLARED:
+            assert(false && "MEMBER NOT DECLARED");
+            break;
+        }
+      }
+    }
     ;
 
 //---------------------------------------------------------------------

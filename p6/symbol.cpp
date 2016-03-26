@@ -27,14 +27,40 @@ Symbol::Symbol(string name, int size, Gpl_type type){
     for (int i=0; i < m_size; i++) {
       ((string*)m_value)[i] = "";
     }
-  } else if (type & GAME_OBJECT) {
+  } else if (type & GAME_OBJECT_ARRAY) {
+    m_value = NULL;
     switch (type) {
-      case CIRCLE:
-        m_value = new Circle[size];
+      case CIRCLE_ARRAY: {
+        m_game_object = new Circle[size];
         for (int i = 0; i < size; i++) {
-          ((Circle*)m_value[i] = 
+          ((Circle*)m_game_object)[i] = new Circle();
         }
         break;
+      } case TRIANGLE_ARRAY: {
+        m_value = new Triangle*[size];
+        for (int i = 0; i < size; i++) {
+          ((Triangle*)m_value)[i] = new Triangle;
+        }
+        break;
+      } case PIXMAP_ARRAY: {
+        m_value = new Pixmap*[size];
+        for (int i = 0; i < size; i++) {
+          ((Pixmap*)m_value)[i] = new Pixmap;
+        }
+        break;
+      } case RECTANGLE_ARRAY: {
+        m_value = new Rectangle*[size];
+        for (int i = 0; i < size; i++) {
+          ((Rectangle*)m_value)[i] = new Rectangle;
+        }
+        break;
+      } case TEXTBOX_ARRAY: {
+        m_value = new Textbox*[size];
+        for (int i = 0; i < size; i++) {
+          ((Textbox*)m_value)[i] = new Textbox;
+        }
+        break;
+      }
     }
   }
   m_game_object = NULL;
@@ -166,6 +192,13 @@ string Symbol::get_string_value(int index) const{
 
 Game_object *Symbol::get_game_object_value() {
   return m_game_object;
+}
+
+bool Symbol::is_game_object() {
+  if (m_type & GAME_OBJECT) {
+    return true; 
+  }
+  return false;
 }
 
 void Symbol::print(ostream &os) {
