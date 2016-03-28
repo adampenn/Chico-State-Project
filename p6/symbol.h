@@ -31,7 +31,7 @@ using std::to_string;
 
 class Symbol {
   public:
-    Symbol(string name, Game_object* game_object);
+    Symbol(string name, Gpl_type type, Game_object* game_object);
     Symbol(string name, int size, Gpl_type type);
     Symbol(string name, int value);
     Symbol(string name, double value);

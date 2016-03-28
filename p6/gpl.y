@@ -201,7 +201,7 @@ Expression* create_unary_expression(Expression *left,
 %token <union_double>   	T_DOUBLE_CONSTANT "double constant"
 %token <union_string> 	  T_STRING_CONSTANT "string constant"
 %type <union_gpl_type>	  simple_type
-%type <union_int>	        object_type
+%type <union_gpl_type>	        object_type
 %type <union_expression>  expression
 %type <union_expression>  primary_expression
 %type <union_expression>  optional_initializer
@@ -358,24 +358,24 @@ object_declaration:
       Symbol* symbol = table->lookup(*$2);
       if (symbol == NULL) {
         switch ($1) {
-          case T_TRIANGLE: {
+          case TRIANGLE: {
             cur_object_under_construction = new Triangle();
             break;
-          } case T_PIXMAP: {
+          } case PIXMAP: {
             cur_object_under_construction = new Pixmap();
             break;
-          } case T_CIRCLE: {
+          } case CIRCLE: {
             cur_object_under_construction = new Circle();
             break;
-          } case T_RECTANGLE: {
+          } case RECTANGLE: {
             cur_object_under_construction = new Rectangle();
             break;
-          } case T_TEXTBOX: {
+          } case TEXTBOX: {
             cur_object_under_construction = new Textbox();
             break;
           }
         }
-        symbol = new Symbol(*$2, cur_object_under_construction);
+        symbol = new Symbol(*$2, $1, cur_object_under_construction);
         table->insert(*$2, symbol);
       } else {
         Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$2);
@@ -391,19 +391,19 @@ object_declaration:
       if (symbol == NULL) {
         int size = $4->eval_int();
         switch ($1) {
-          case T_TRIANGLE:
+          case TRIANGLE:
 	          symbol = new Symbol(*$2, size, TRIANGLE);
             break;
-          case T_PIXMAP:
+          case PIXMAP:
 	          symbol = new Symbol(*$2, size, PIXMAP);
             break;
-          case T_CIRCLE:
+          case CIRCLE:
 	          symbol = new Symbol(*$2, size, CIRCLE);
             break;
-          case T_RECTANGLE:
+          case RECTANGLE:
 	          symbol = new Symbol(*$2, size, RECTANGLE);
             break;
-          case T_TEXTBOX:
+          case TEXTBOX:
 	          symbol = new Symbol(*$2, size, TEXTBOX);
             break;
         }
@@ -419,23 +419,23 @@ object_declaration:
 object_type:
     T_TRIANGLE
     {
-      $$ = T_TRIANGLE;
+      $$ = TRIANGLE;
     }
     | T_PIXMAP
     {
-      $$ = T_PIXMAP;
+      $$ = PIXMAP;
     }
     | T_CIRCLE
     {
-      $$ = T_CIRCLE;
+      $$ = CIRCLE;
     }
     | T_RECTANGLE
     {
-      $$ = T_RECTANGLE;
+      $$ = RECTANGLE;
     }
     | T_TEXTBOX
     {
-      $$ = T_TEXTBOX;
+      $$ = TEXTBOX;
     }
     ;
 

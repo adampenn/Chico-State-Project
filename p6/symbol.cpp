@@ -1,8 +1,8 @@
 #include "symbol.h"
 
-Symbol::Symbol(string name, Game_object* game_object) {
+Symbol::Symbol(string name, Gpl_type type, Game_object* game_object) {
   m_name = name;
-  m_type = GAME_OBJECT;
+  m_type = type;
   m_size = UNDEFINED_SIZE;
   m_value = NULL;
   m_game_object = game_object;
@@ -32,34 +32,21 @@ Symbol::Symbol(string name, int size, Gpl_type type){
     switch (type) {
       case CIRCLE_ARRAY: {
         m_game_object = new Circle[size];
-        for (int i = 0; i < size; i++) {
-          ((Circle*)m_game_object)[i] = new Circle();
-        }
         break;
       } case TRIANGLE_ARRAY: {
-        m_value = new Triangle*[size];
-        for (int i = 0; i < size; i++) {
-          ((Triangle*)m_value)[i] = new Triangle;
-        }
+        m_game_object = new Triangle[size];
         break;
       } case PIXMAP_ARRAY: {
-        m_value = new Pixmap*[size];
-        for (int i = 0; i < size; i++) {
-          ((Pixmap*)m_value)[i] = new Pixmap;
-        }
+        m_game_object = new Pixmap[size];
         break;
       } case RECTANGLE_ARRAY: {
-        m_value = new Rectangle*[size];
-        for (int i = 0; i < size; i++) {
-          ((Rectangle*)m_value)[i] = new Rectangle;
-        }
+        m_game_object = new Rectangle[size];
         break;
       } case TEXTBOX_ARRAY: {
-        m_value = new Textbox*[size];
-        for (int i = 0; i < size; i++) {
-          ((Textbox*)m_value)[i] = new Textbox;
-        }
+        m_game_object = new Textbox[size];
         break;
+      } default: {
+        assert(false && "Error creating game object array");
       }
     }
   }
@@ -190,7 +177,7 @@ string Symbol::get_string_value(int index) const{
   }  
 }
 
-Game_object *Symbol::get_game_object_value() {
+Game_object *Symbol::get_game_object_value() const{
   return m_game_object;
 }
 
@@ -217,8 +204,10 @@ void Symbol::print(ostream &os) {
   } else if (m_type == STRING_ARRAY) {
     for (int i = 0; i < m_size; i++)
       os << "string " << m_name << "[" << i << "] = " << "\"" << ((string *)m_value)[i] << "\"" << endl;
-  } else if (m_type == GAME_OBJECT) {
-    os << "game object " << m_name << " = " << m_game_object << endl;
+  } else if (m_type & GAME_OBJECT) {
+    m_game_object->print(m_name, os);
+  } else if (m_type & GAME_OBJECT_ARRAY) {
+    m_game_object->print(m_name, os);
   }
 }
 
