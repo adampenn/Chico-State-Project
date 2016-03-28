@@ -1,11 +1,21 @@
 #include "symbol.h"
 
+Symbol::Symbol(string name, Animation_block* animation_block) {
+  m_name = name;
+  m_type = ANIMATION_BLOCK;
+  m_size = UNDEFINED_INDEX;
+  m_value = NULL;
+  m_game_object = NULL;
+  m_animation_block = animation_block;
+}
+
 Symbol::Symbol(string name, Gpl_type type, Game_object* game_object) {
   m_name = name;
   m_type = type;
   m_size = UNDEFINED_SIZE;
   m_value = NULL;
   m_game_object = game_object;
+  m_animation_block = NULL;
 }
 
 Symbol::Symbol(string name, int size, Gpl_type type){
@@ -50,7 +60,6 @@ Symbol::Symbol(string name, int size, Gpl_type type){
       }
     }
   }
-  m_game_object = NULL;
 }
 Symbol::Symbol(string name, int value){
   m_name = name;

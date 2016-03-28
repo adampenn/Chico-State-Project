@@ -31,6 +31,7 @@ using std::to_string;
 
 class Symbol {
   public:
+    Symbol(string name, Animation_block* animation_block);
     Symbol(string name, Gpl_type type, Game_object* game_object);
     Symbol(string name, int size, Gpl_type type);
     Symbol(string name, int value);
@@ -53,6 +54,7 @@ class Symbol {
     void* m_value;
     int m_size;
     Game_object* m_game_object;
+    Animation_block* m_animation_block;
     Gpl_type m_type;
 };
 

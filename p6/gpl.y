@@ -33,7 +33,7 @@ extern int line_count;            // current line in the input; from record.l
 using namespace std;
 Symbol_table* table = Symbol_table::instance();
 Game_object* cur_object_under_construction = NULL;
-
+string cur_object_name = "";
 // bison syntax to indicate the end of the header
 
 // Error checking
@@ -201,7 +201,7 @@ Expression* create_unary_expression(Expression *left,
 %token <union_double>   	T_DOUBLE_CONSTANT "double constant"
 %token <union_string> 	  T_STRING_CONSTANT "string constant"
 %type <union_gpl_type>	  simple_type
-%type <union_gpl_type>	        object_type
+%type <union_gpl_type>	  object_type
 %type <union_expression>  expression
 %type <union_expression>  primary_expression
 %type <union_expression>  optional_initializer
@@ -454,13 +454,7 @@ parameter_list_or_empty :
 //---------------------------------------------------------------------
 parameter_list :
     parameter_list T_COMMA parameter
-    { 
-      //$$ = $3;
-    }
     | parameter
-    {
-      //$$ = $1
-    }
     ;
 
 //---------------------------------------------------------------------
@@ -471,10 +465,10 @@ parameter:
       if (type == INT) {
         switch (cur_object_under_construction->set_member_variable(*$1, $3->eval_int())) {
           case MEMBER_NOT_OF_GIVEN_TYPE:
-            assert(false && "MEMBER NOT OF GIVEN TYPE ERROR");
+            Error::error(Error::INCORRECT_CONSTRUCTOR_PARAMETER_TYPE, cur_object_name, *$1);
             break;
           case MEMBER_NOT_DECLARED:
-            assert(false && "MEMBER NOT DECLARED");
+            Error::error(Error::UNKNOWN_CONSTRUCTOR_PARAMETER, cur_object_name, *$1);
             break;
         }
       } else if (type == DOUBLE) {
