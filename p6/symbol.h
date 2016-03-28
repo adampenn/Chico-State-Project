@@ -12,6 +12,7 @@
 #include "pixmap.h"
 #include "textbox.h"
 #include "triangle.h"
+#include "animation_block.h"
 #include <sstream>
 
 using std::stringstream;

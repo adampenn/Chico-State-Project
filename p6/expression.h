@@ -6,6 +6,9 @@
 
 class Variable;
 
+// TYSON PLEASE READ THIS AND THEN EMAIL HIM SO HE KNOWS YOU READ IT
+// this is a comment so justin will shut the fuck up.
+
 class Expression {
   public:
     Expression(int value);
@@ -18,6 +21,7 @@ class Expression {
     int eval_int();//+-*/<>...
     double eval_double();
     string eval_string();//+
+    Animation_block* eval_animation_block();
   private:
     enum Tree_kinds {EXPRESSION, CONSTANT, VARIABLE, UNARY, BINARY};
     Tree_kinds m_kind;

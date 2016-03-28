@@ -130,6 +130,11 @@ Expression::Expression(Variable* variable) {
   m_kind = VARIABLE;
 }
 
+Animation_block* Expression::eval_animation_block() {
+  assert(m_type == ANIMATION_BLOCK);
+  return m_variable->get_animation_block_value();
+}
+
 Gpl_type Expression::get_type() {
   return m_type;
 }

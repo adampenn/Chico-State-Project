@@ -100,6 +100,10 @@ Gpl_type Symbol::get_base_type(){
     return DOUBLE;
   } else if (m_type == STRING || m_type == STRING_ARRAY) {
     return STRING;
+  } else if (m_type == GAME_OBJECT || m_type == GAME_OBJECT_ARRAY) {
+    return GAME_OBJECT;
+  } else if (m_type == ANIMATION_BLOCK) {
+    return ANIMATION_BLOCK;
   }
   assert(false && "No type declared");
   return INT;
