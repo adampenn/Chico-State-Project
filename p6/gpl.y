@@ -446,13 +446,7 @@ object_type:
 //---------------------------------------------------------------------
 parameter_list_or_empty :
     parameter_list
-    {
-      //$$ = $1;
-    }
     | empty
-    {
-      //$$ = $1;
-    }
     ;
 
 //---------------------------------------------------------------------
@@ -465,34 +459,34 @@ parameter_list :
 parameter:
     T_ID T_ASSIGN expression
     {
+      Status error_code;
+      Expression* expr = $3;
       Gpl_type type = $3->get_type();
-      if (type == INT) {
-        switch (cur_object_under_construction->set_member_variable(*$1, $3->eval_int())) {
-          case MEMBER_NOT_OF_GIVEN_TYPE:
-            Error::error(Error::INCORRECT_CONSTRUCTOR_PARAMETER_TYPE, cur_object_name, *$1);
-            break;
-          case MEMBER_NOT_DECLARED:
-            Error::error(Error::UNKNOWN_CONSTRUCTOR_PARAMETER, cur_object_name, *$1);
-            break;
+      switch(type) {
+        case INT: {
+          error_code = cur_object_under_construction->set_member_variable(*$1, $3->eval_int());
+          break;
+        } case DOUBLE: {
+          error_code = cur_object_under_construction->set_member_variable(*$1, $3->eval_double());
+          break;
+        } case STRING: {
+          error_code = cur_object_under_construction->set_member_variable(*$1, $3->eval_string());
+          break;
+        } case ANIMATION_BLOCK: {
+          error_code = cur_object_under_construction->set_member_variable(*$1, $3->eval_animation_block());
+          break;
+        } default: {
+          assert(false && "PARAMETER CASE GPL.Y");
+          break;
         }
-      } else if (type == DOUBLE) {
-        switch (cur_object_under_construction->set_member_variable(*$1, $3->eval_double())) {
-          case MEMBER_NOT_OF_GIVEN_TYPE:
-            assert(false && "MEMBER NOT OF GIVEN TYPE ERROR");
-            break;
-          case MEMBER_NOT_DECLARED:
-            assert(false && "MEMBER NOT DECLARED");
-            break;
-        }
-      } else if (type == STRING) {
-        switch (cur_object_under_construction->set_member_variable(*$1, $3->eval_string())) {
-          case MEMBER_NOT_OF_GIVEN_TYPE:
-            assert(false && "MEMBER NOT OF GIVEN TYPE ERROR");
-            break;
-          case MEMBER_NOT_DECLARED:
-            assert(false && "MEMBER NOT DECLARED");
-            break;
-        }
+      }
+      switch (error_code) {
+        case MEMBER_NOT_OF_GIVEN_TYPE:
+          assert(false && "MEMBER NOT OF GIVEN TYPE ERROR");
+          break;
+        case MEMBER_NOT_DECLARED:
+          assert(false && "MEMBER NOT DECLARED");
+          break;
       }
     }
     ;

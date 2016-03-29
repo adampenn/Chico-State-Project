@@ -221,6 +221,10 @@ void Symbol::print(ostream &os) {
     m_game_object->print(m_name, os);
   } else if (m_type & GAME_OBJECT_ARRAY) {
     m_game_object->print(m_name, os);
+  } else if (m_type == ANIMATION_BLOCK) {
+    os << "animation_block " << m_name << endl;
+  } else {
+    assert(false && "Not defined in print statement");
   }
 }
 
