@@ -2,24 +2,19 @@
 
 Variable::Variable(Symbol* symbol) {
   m_symbol = symbol;
+  m_value= NULL;
   m_expr = NULL;
   m_type = m_symbol->get_base_type();
-  m_animation_block = NULL;
 }
 
 Variable::Variable(Symbol* symbol, Expression* expr) {
+  m_value = NULL;
   m_symbol = symbol;
   m_expr = expr;
   m_type = m_symbol->get_base_type();
-  m_animation_block = NULL;
 }
-    
-Variable::Variable(Animation_block* ab){
-  m_symbol = NULL;
-  m_expr = NULL;
-  m_type = ANIMATION_BLOCK;
-  m_animation_block = ab;
-}
+
+
 
 Gpl_type Variable::get_type() {
   return m_type;
@@ -61,6 +56,6 @@ string Variable::get_string_value() {
 }
 
 Animation_block* Variable::get_animation_block_value() {
-  return m_animation_block;
+  return m_symbol->get_animation_block_value();
 }
 

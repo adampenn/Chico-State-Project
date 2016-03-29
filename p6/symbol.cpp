@@ -4,18 +4,14 @@ Symbol::Symbol(string name, Animation_block* animation_block) {
   m_name = name;
   m_type = ANIMATION_BLOCK;
   m_size = UNDEFINED_INDEX;
-  m_value = NULL;
-  m_game_object = NULL;
-  m_animation_block = animation_block;
+  m_value = (void *)animation_block;
 }
 
 Symbol::Symbol(string name, Gpl_type type, Game_object* game_object) {
   m_name = name;
   m_type = type;
   m_size = UNDEFINED_SIZE;
-  m_value = NULL;
-  m_game_object = game_object;
-  m_animation_block = NULL;
+  m_value = (void *)game_object;
 }
 
 Symbol::Symbol(string name, int size, Gpl_type type){
@@ -38,22 +34,21 @@ Symbol::Symbol(string name, int size, Gpl_type type){
       ((string*)m_value)[i] = "";
     }
   } else if (type & GAME_OBJECT_ARRAY) {
-    m_value = NULL;
     switch (type) {
       case CIRCLE_ARRAY: {
-        m_game_object = new Circle[size];
+        m_value = new Circle[size];
         break;
       } case TRIANGLE_ARRAY: {
-        m_game_object = new Triangle[size];
+        m_value = new Triangle[size];
         break;
       } case PIXMAP_ARRAY: {
-        m_game_object = new Pixmap[size];
+        m_value = new Pixmap[size];
         break;
       } case RECTANGLE_ARRAY: {
-        m_game_object = new Rectangle[size];
+        m_value = new Rectangle[size];
         break;
       } case TEXTBOX_ARRAY: {
-        m_game_object = new Textbox[size];
+        m_value = new Textbox[size];
         break;
       } default: {
         assert(false && "Error creating game object array");
@@ -61,12 +56,12 @@ Symbol::Symbol(string name, int size, Gpl_type type){
     }
   }
 }
+
 Symbol::Symbol(string name, int value){
   m_name = name;
   m_type = INT;
   m_size = UNDEFINED_SIZE;
   m_value = (void *) new int(value);
-  m_game_object = NULL;
 }
 
 Symbol::Symbol(string name, double value){
@@ -74,7 +69,6 @@ Symbol::Symbol(string name, double value){
   m_type = DOUBLE;
   m_size = UNDEFINED_SIZE;
   m_value = (void *) new double(value);
-  m_game_object = NULL;
 }
 
 Symbol::Symbol(string name, string value){
@@ -82,7 +76,6 @@ Symbol::Symbol(string name, string value){
   m_type = STRING;
   m_size = UNDEFINED_SIZE;
   m_value = (void *) new string(value);
-  m_game_object = NULL;
 }
 
 Gpl_type Symbol::get_type(){
@@ -191,7 +184,11 @@ string Symbol::get_string_value(int index) const{
 }
 
 Game_object *Symbol::get_game_object_value() const{
-  return m_game_object;
+  return (Game_object *) m_value;
+}
+
+Animation_block* Symbol::get_animation_block_value() const{
+  return (Animation_block *) m_value;
 }
 
 bool Symbol::is_game_object() {
@@ -218,9 +215,9 @@ void Symbol::print(ostream &os) {
     for (int i = 0; i < m_size; i++)
       os << "string " << m_name << "[" << i << "] = " << "\"" << ((string *)m_value)[i] << "\"" << endl;
   } else if (m_type & GAME_OBJECT) {
-    m_game_object->print(m_name, os);
+    ((Game_object *)m_value)->print(m_name, os);
   } else if (m_type & GAME_OBJECT_ARRAY) {
-    m_game_object->print(m_name, os);
+    ((Game_object *)m_value)->print(m_name, os);
   } else if (m_type == ANIMATION_BLOCK) {
     os << "animation_block " << m_name << endl;
   } else {

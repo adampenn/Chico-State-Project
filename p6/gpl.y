@@ -203,7 +203,7 @@ Expression* create_unary_expression(Expression *left,
 %token <union_string> 	  T_STRING_CONSTANT "string constant"
 %type <union_gpl_type>	  simple_type
 %type <union_gpl_type>	  object_type
-%type <union_symbol>  animation_parameter
+%type <union_symbol>      animation_parameter
 %type <union_expression>  expression
 %type <union_expression>  primary_expression
 %type <union_expression>  optional_initializer
@@ -482,10 +482,10 @@ parameter:
       }
       switch (error_code) {
         case MEMBER_NOT_OF_GIVEN_TYPE:
-          assert(false && "MEMBER NOT OF GIVEN TYPE ERROR");
+          Error::error(Error::INCORRECT_CONSTRUCTOR_PARAMETER_TYPE, cur_object_name, *$1);
           break;
         case MEMBER_NOT_DECLARED:
-          assert(false && "MEMBER NOT DECLARED");
+          Error::error(Error::UNDECLARED_MEMBER, cur_object_name, *$1);
           break;
       }
     }

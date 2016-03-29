@@ -47,6 +47,7 @@ class Symbol {
     double get_double_value(int index = UNDEFINED_INDEX) const;
     string get_string_value(int index = UNDEFINED_INDEX) const;
     Game_object* get_game_object_value() const;
+    Animation_block* get_animation_block_value() const;
     string get_name() const;
     void print(ostream &os);
     bool is_game_object();  
@@ -54,8 +55,6 @@ class Symbol {
     string m_name;
     void* m_value;
     int m_size;
-    Game_object* m_game_object;
-    Animation_block* m_animation_block;
     Gpl_type m_type;
 };
 
