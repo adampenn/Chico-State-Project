@@ -36,19 +36,44 @@ Symbol::Symbol(string name, int size, Gpl_type type){
   } else if (type & GAME_OBJECT_ARRAY) {
     switch (type) {
       case CIRCLE_ARRAY: {
-        m_value = new Circle[size];
+        Circle** game;
+        game = new Circle*[size];
+        for (int i = 0; i < size; i++) {
+          game[i] = new Circle();
+        }
+        m_value = (void *)game;
         break;
       } case TRIANGLE_ARRAY: {
-        m_value = new Triangle[size];
+        Triangle** game;
+        game = new Triangle*[size];
+        for (int i = 0; i < size; i++) {
+          game[i] = new Triangle();
+        }
+        m_value = (void *)game;
         break;
       } case PIXMAP_ARRAY: {
-        m_value = new Pixmap[size];
+        Pixmap** game;
+        game = new Pixmap*[size];
+        for (int i = 0; i < size; i++) {
+          game[i] = new Pixmap();
+        }
+        m_value = (void *)game;
         break;
       } case RECTANGLE_ARRAY: {
-        m_value = new Rectangle[size];
+        Rectangle** game;
+        game = new Rectangle*[size];
+        for (int i = 0; i < size; i++) {
+          game[i] = new Rectangle();
+        }
+        m_value = (void *)game;
         break;
       } case TEXTBOX_ARRAY: {
-        m_value = new Textbox[size];
+        Textbox** game;
+        game = new Textbox*[size];
+        for (int i = 0; i < size; i++) {
+          game[i] = new Textbox();
+        }
+        m_value = (void *)game;
         break;
       } default: {
         assert(false && "Error creating game object array");
@@ -194,31 +219,7 @@ Game_object *Symbol::get_game_object_value(int index) const{
       return NULL;
     } else {
       assert(m_type & GAME_OBJECT_ARRAY);
-      switch(m_type) {
-        case CIRCLE_ARRAY: {
-          Game_object* game_object =  ((Circle)m_value)[index];
-          return game_object;
-          break;
-        } case TRIANGLE_ARRAY: {
-          Game_object* game_object =  ((Triangle)m_value)[index];
-          return game_object;
-          break;
-        } case PIXMAP_ARRAY: {
-          Game_object* game_object =  ((Pixmap)m_value)[index];
-          return game_object;
-          break;
-        } case RECTANGLE_ARRAY: {
-          Game_object* game_object =  ((Rectangle)m_value)[index];
-          return game_object;
-          break;
-        } case TEXTBOX_ARRAY: {
-          Game_object* game_object =  ((Textbox)m_value)[index];
-          return game_object;
-          break;
-        } default: {
-          assert(false && "SHOULD NOT BE HERE");
-        }
-      }
+      return ((Game_object**)m_value)[index];
     }
   }
 }
@@ -250,9 +251,13 @@ void Symbol::print(ostream &os) {
   } else if (m_type == STRING_ARRAY) {
     for (int i = 0; i < m_size; i++)
       os << "string " << m_name << "[" << i << "] = " << "\"" << ((string *)m_value)[i] << "\"" << endl;
+  } else if (m_type & ARRAY && m_type & GAME_OBJECT) {
+    for (int i = 0; i < m_size; i++) {
+      stringstream ss;
+      ss << m_name << "[" << i << "]";
+      ((Game_object **)m_value)[i]->print(ss.str(), os);
+    }
   } else if (m_type & GAME_OBJECT) {
-    ((Game_object *)m_value)->print(m_name, os);
-  } else if (m_type & GAME_OBJECT_ARRAY) {
     ((Game_object *)m_value)->print(m_name, os);
   } else if (m_type == ANIMATION_BLOCK) {
     os << "animation_block " << m_name << endl;
