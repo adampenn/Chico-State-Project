@@ -1,14 +1,3 @@
-/* ASK TYSON:
-
-   t106
-     could fix by saying if ! NO_TYPE before issuing
-     invalid left operand error
-   t120
-     Fixed by saying if ! NO_TYPE before issuing invalid
-     init type error
-
-*/
-
 /*
 
   This file contains the input to the bison compiler generator.
@@ -689,11 +678,54 @@ variable:
     }
     | T_ID T_PERIOD T_ID
     {
-      assert(false && "THIS IS FOR P6");
+      Symbol* symbol = table->lookup(*$1);
+      if (symbol != NULL) {
+        if (symbol->get_base_type() == GAME_OBJECT) {
+        Game_object* game_object = symbol->get_game_object_value();
+          Gpl_type type;
+          switch(game_object->get_member_variable_type(*$3, type)) {
+            case MEMBER_NOT_DECLARED: {
+              Error::error(Error::UNDECLARED_MEMBER, *$1, *$3);
+            } case OK: {
+              $$ = new Variable(symbol, $3);
+            }
+          }
+        }
+      } else {
+        assert(false && "ISSUE ERROR HERE");
+      }
     }
     | T_ID T_LBRACKET expression T_RBRACKET T_PERIOD T_ID
     {
-      assert(false && "THIS IS FOR P6");
+      Symbol* symbol = table->lookup(*$1);
+      if (symbol != NULL) {
+        Game_object* game_object = NULL;
+        if (symbol->get_base_type() == GAME_OBJECT) {
+      	  if ($3->get_type() != INT) {
+            stringstream ss;
+            if ($3->get_type() == DOUBLE) {
+              ss << $3->eval_double();
+	            Error::error(Error::INVALID_ARRAY_SIZE, *$1, ss.str());
+            } else if ( $3->get_type() == STRING) {
+              ss << $3->eval_string();
+	            Error::error(Error::INVALID_ARRAY_SIZE, *$1, ss.str());
+            }
+	        } else {
+            int index = $3->eval_int();
+            game_object = symbol->get_game_object_value(index);
+          }
+          Gpl_type type;
+          switch(game_object->get_member_variable_type(*$6, type)) {
+            case MEMBER_NOT_DECLARED: {
+              Error::error(Error::UNDECLARED_MEMBER, *$1, *$6);
+            } case OK: {
+              $$ = new Variable(symbol, $3);
+            }
+          }
+        }
+      } else {
+        assert(false && "ISSUE ERROR HERE");
+      }
     }
     ;
 

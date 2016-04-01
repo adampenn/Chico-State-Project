@@ -93,7 +93,7 @@ Gpl_type Symbol::get_base_type(){
     return DOUBLE;
   } else if (m_type == STRING || m_type == STRING_ARRAY) {
     return STRING;
-  } else if (m_type == GAME_OBJECT || m_type == GAME_OBJECT_ARRAY) {
+  } else if (m_type & GAME_OBJECT || m_type & GAME_OBJECT_ARRAY) {
     return GAME_OBJECT;
   } else if (m_type == ANIMATION_BLOCK) {
     return ANIMATION_BLOCK;
@@ -183,8 +183,44 @@ string Symbol::get_string_value(int index) const{
   }  
 }
 
-Game_object *Symbol::get_game_object_value() const{
-  return (Game_object *) m_value;
+Game_object *Symbol::get_game_object_value(int index) const{
+  if (index == UNDEFINED_INDEX) {
+    return (Game_object *) m_value;
+  } else {
+    if (index > m_size) {
+      stringstream ss;
+      ss << index;
+	    Error::error(Error::ARRAY_INDEX_OUT_OF_BOUNDS, m_name, ss.str());
+      return NULL;
+    } else {
+      assert(m_type & GAME_OBJECT_ARRAY);
+      switch(m_type) {
+        case CIRCLE_ARRAY: {
+          Game_object* game_object =  ((Circle)m_value)[index];
+          return game_object;
+          break;
+        } case TRIANGLE_ARRAY: {
+          Game_object* game_object =  ((Triangle)m_value)[index];
+          return game_object;
+          break;
+        } case PIXMAP_ARRAY: {
+          Game_object* game_object =  ((Pixmap)m_value)[index];
+          return game_object;
+          break;
+        } case RECTANGLE_ARRAY: {
+          Game_object* game_object =  ((Rectangle)m_value)[index];
+          return game_object;
+          break;
+        } case TEXTBOX_ARRAY: {
+          Game_object* game_object =  ((Textbox)m_value)[index];
+          return game_object;
+          break;
+        } default: {
+          assert(false && "SHOULD NOT BE HERE");
+        }
+      }
+    }
+  }
 }
 
 Animation_block* Symbol::get_animation_block_value() const{

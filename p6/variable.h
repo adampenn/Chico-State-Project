@@ -10,8 +10,8 @@ class Variable {
     Variable(int value);
     Variable(double value);
     Variable(string value);
-    Variable(Symbol* symbol);
-    Variable(Symbol* symbol, Expression* expr);
+    Variable(Symbol* symbol, string* field = NULL);
+    Variable(Symbol* symbol, Expression* expr, string* field = NULL);
     Gpl_type get_type();
     int get_int_value();
     double get_double_value();
@@ -20,6 +20,7 @@ class Variable {
   private:
     Symbol* m_symbol;
     void* m_value;
+    string* m_field;
     Expression* m_expr;
     Gpl_type m_type;
 };
