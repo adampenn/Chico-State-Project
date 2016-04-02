@@ -451,6 +451,11 @@ parameter:
       Status error_code;
       Expression* expr = $3;
       Gpl_type type = $3->get_type();
+      if (*$1 == "text") {
+        type = STRING;
+      } else if (*$1 == "rotation" || *$1 == "skew" || *$1 == "blue" || *$1 == "red" || *$1 == "green") {
+        type = DOUBLE;
+      }
       switch(type) {
         case INT: {
           error_code = cur_object_under_construction->set_member_variable(*$1, $3->eval_int());
