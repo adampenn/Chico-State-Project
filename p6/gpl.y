@@ -22,6 +22,7 @@ extern int line_count;            // current line in the input; from record.l
 using namespace std;
 Symbol_table* table = Symbol_table::instance();
 Game_object* cur_object_under_construction = NULL;
+Gpl_type cur_object_type = NO_TYPE;
 string cur_object_name = "";
 // bison syntax to indicate the end of the header
 
@@ -366,6 +367,7 @@ object_declaration:
             break;
           }
         }
+        cur_object_type = $1;
         cur_object_name = *$2;
         symbol = new Symbol(*$2, $1, cur_object_under_construction);
         table->insert(*$2, symbol);
@@ -399,6 +401,7 @@ object_declaration:
 	          symbol = new Symbol(*$2, size, TEXTBOX_ARRAY);
             break;
         }
+        cur_object_type = $1;
         cur_object_name = *$2;
         table->insert(*$2, symbol);
         cur_object_under_construction = NULL;
@@ -453,6 +456,8 @@ parameter:
       Gpl_type type = $3->get_type();
       if (*$1 == "text") {
         type = STRING;
+      } else if (*$1 == "rotation" && $3->get_type() == STRING) {
+        type = STRING;
       } else if (*$1 == "rotation" || *$1 == "skew" || *$1 == "blue" || *$1 == "red" || *$1 == "green") {
         type = DOUBLE;
       }
@@ -478,9 +483,26 @@ parameter:
         case MEMBER_NOT_OF_GIVEN_TYPE:
           Error::error(Error::INCORRECT_CONSTRUCTOR_PARAMETER_TYPE, cur_object_name, *$1);
           break;
-        case MEMBER_NOT_DECLARED:
-          Error::error(Error::UNDECLARED_MEMBER, cur_object_name, *$1);
+        case MEMBER_NOT_DECLARED: {
+          switch (cur_object_type) {
+            case TRIANGLE:
+              Error::error(Error::UNKNOWN_CONSTRUCTOR_PARAMETER, "triangle", *$1);
+              break;
+            case PIXMAP:
+              Error::error(Error::UNKNOWN_CONSTRUCTOR_PARAMETER, "pixmap", *$1);
+              break;
+            case CIRCLE:
+              Error::error(Error::UNKNOWN_CONSTRUCTOR_PARAMETER, "circle", *$1);
+              break;
+            case RECTANGLE:
+              Error::error(Error::UNKNOWN_CONSTRUCTOR_PARAMETER, "rectangle", *$1);
+              break;
+            case TEXTBOX:
+              Error::error(Error::UNKNOWN_CONSTRUCTOR_PARAMETER, "textbox", *$1);
+              break;
+          }
           break;
+        }
       }
     }
     ;
@@ -489,10 +511,14 @@ parameter:
 forward_declaration:
     T_FORWARD T_ANIMATION T_ID T_LPAREN animation_parameter T_RPAREN
     {
-      Animation_block* ab = new Animation_block();
-      ab->initialize($5, *$3);
-      Symbol* symbol = new Symbol(*$3, ab);
-      table->insert(*$3, symbol);
+      if (!table->lookup(*$3)) {
+        Animation_block* ab = new Animation_block();
+        ab->initialize($5, *$3);
+        Symbol* symbol = new Symbol(*$3, ab);
+        table->insert(*$3, symbol);
+      } else {
+        Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$3);
+      }
     }
     ;
 
@@ -523,30 +549,35 @@ animation_block:
 animation_parameter:
     object_type T_ID
     {
-      switch ($1) {
-        case TRIANGLE: {
-          cur_object_under_construction = new Triangle();
-          break;
-        } case PIXMAP: {
-          cur_object_under_construction = new Pixmap();
-          break;
-        } case CIRCLE: {
-          cur_object_under_construction = new Circle();
-          break;
-        } case RECTANGLE: {
-          cur_object_under_construction = new Rectangle();
-          break;
-        } case TEXTBOX: {
-          cur_object_under_construction = new Textbox();
-          break;
+      if (!table->lookup(*$2)) {
+        switch ($1) {
+          case TRIANGLE: {
+            cur_object_under_construction = new Triangle();
+            break;
+          } case PIXMAP: {
+            cur_object_under_construction = new Pixmap();
+            break;
+          } case CIRCLE: {
+            cur_object_under_construction = new Circle();
+            break;
+          } case RECTANGLE: {
+            cur_object_under_construction = new Rectangle();
+            break;
+          } case TEXTBOX: {
+            cur_object_under_construction = new Textbox();
+            break;
+          }
         }
+        cur_object_under_construction->never_animate();
+        cur_object_under_construction->never_draw();
+        cur_object_name = *$2;
+        Symbol* symbol = new Symbol(*$2, $1, cur_object_under_construction);
+        table->insert(*$2, symbol);
+        $$ = symbol;
+      } else {
+        Error::error(Error::ANIMATION_PARAMETER_NAME_NOT_UNIQUE, *$2);
+        $$ = NULL;
       }
-      cur_object_under_construction->never_animate();
-      cur_object_under_construction->never_draw();
-      cur_object_name = *$2;
-      Symbol* symbol = new Symbol(*$2, $1, cur_object_under_construction);
-      table->insert(*$2, symbol);
-      $$ = symbol;
     }
     ;
 
@@ -695,9 +726,13 @@ variable:
               $$ = new Variable(symbol, $3);
             }
           }
+        } else {
+	        Error::error(Error::LHS_OF_PERIOD_MUST_BE_OBJECT, *$1);
+          $$ = new Variable(new Symbol(*$1, 0));
         }
       } else {
-        assert(false && "ISSUE ERROR HERE");
+	      Error::error(Error::UNDECLARED_VARIABLE, *$1);
+        $$ = new Variable(new Symbol(*$1, 0));
       }
     }
     | T_ID T_LBRACKET expression T_RBRACKET T_PERIOD T_ID
@@ -727,9 +762,13 @@ variable:
               $$ = new Variable(symbol, $3, $6);
             }
           }
+        } else {
+	        Error::error(Error::LHS_OF_PERIOD_MUST_BE_OBJECT, *$1);
+          $$ = new Variable(new Symbol(*$1, 0));
         }
       } else {
-        assert(false && "ISSUE ERROR HERE");
+	      Error::error(Error::UNDECLARED_VARIABLE, *$1);
+        $$ = new Variable(new Symbol(*$1, 0));
       }
     }
     ;
@@ -908,7 +947,6 @@ primary_expression:
     }
     | variable
     { 
-      
       $$ = new Expression($1);
     }
     | T_INT_CONSTANT
