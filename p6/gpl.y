@@ -472,6 +472,13 @@ parameter:
           error_code = cur_object_under_construction->set_member_variable(*$1, $3->eval_string());
           break;
         } case ANIMATION_BLOCK: {
+          Symbol* symbol = table->lookup($3->eval_animation_block()->name());
+          if (symbol != NULL) {
+            symbol = symbol->get_animation_block_value()->get_parameter_symbol();
+            if (gpl_type_to_string(symbol->get_type()) != cur_object_under_construction->type()) {
+              Error::error(Error::TYPE_MISMATCH_BETWEEN_ANIMATION_BLOCK_AND_OBJECT, cur_object_name, $3->eval_animation_block()->name());
+            }
+          }
           error_code = cur_object_under_construction->set_member_variable(*$1, $3->eval_animation_block());
           break;
         } default: {

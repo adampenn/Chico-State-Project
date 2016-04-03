@@ -130,7 +130,7 @@ Gpl_type Symbol::get_base_type(){
 void Symbol::set(int value, int index) {
   if (index == UNDEFINED_INDEX) {
     assert(m_type == INT);
-    m_value = (void *) &value;
+    *((int *) m_value) = value;
   } else {
     assert(m_type == INT_ARRAY);
     ((int *)m_value)[index] = value;
@@ -140,7 +140,7 @@ void Symbol::set(int value, int index) {
 void Symbol::set(double value, int index) {
   if (index == UNDEFINED_INDEX) {
     assert(m_type == DOUBLE);
-    m_value = (void *) &value;
+    *((double *) m_value) = value;
   } else {
     assert(m_type == DOUBLE_ARRAY);
     ((double *)m_value)[index] = value;
@@ -150,7 +150,7 @@ void Symbol::set(double value, int index) {
 void Symbol::set(string value, int index) {
   if (index == UNDEFINED_INDEX) {
     assert(m_type == STRING);
-    m_value = (void *) &value;
+    *((string *) m_value) = value;
   } else {
     assert(m_type == STRING_ARRAY);
     ((string *)m_value)[index] = value;

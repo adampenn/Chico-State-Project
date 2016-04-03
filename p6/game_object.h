@@ -206,7 +206,7 @@ class Game_object
     void register_member_variable(std::string name, std::string *value)
      { register_member_variable(STRING, name, (void *) value);}
     void register_member_variable(std::string name, Animation_block **value)
-     { register_member_variable(ANIMATION_BLOCK, name, (void *) value);}
+     { register_member_cur_object_under_constructionvariable(ANIMATION_BLOCK, name, (void *) value);}
 
     Status mark_member_variable_as_derived(std::string name);
       
