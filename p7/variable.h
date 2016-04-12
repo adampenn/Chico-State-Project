@@ -17,6 +17,7 @@ class Variable {
     double get_double_value();
     string get_string_value();
     Animation_block* get_animation_block_value();
+    void set(Expression* expr);
   private:
     Symbol* m_symbol;
     void* m_value;

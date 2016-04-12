@@ -608,6 +608,7 @@ check_animation_parameter:
 on_block:
     T_ON keystroke statement_block
     {
+      int key = $2;
       event_manager->insert($2, $3);
     }
     ;
@@ -787,6 +788,9 @@ exit_statement:
 //---------------------------------------------------------------------
 assign_statement:
     variable T_ASSIGN expression
+    {
+      $1->set($3);
+    }
     | variable T_PLUS_ASSIGN expression
     | variable T_MINUS_ASSIGN expression
     ;

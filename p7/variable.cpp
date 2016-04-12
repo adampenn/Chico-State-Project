@@ -131,3 +131,36 @@ Animation_block* Variable::get_animation_block_value() {
   return m_symbol->get_animation_block_value();
 }
 
+void Variable::set(Expression* expr) {
+  if (m_expr != NULL) {
+    switch(m_symbol->get_base_type()) {
+      case INT: {
+        m_symbol->set(expr->eval_int(), m_expr->eval_int());
+        break;
+      } case DOUBLE: {
+        m_symbol->set(expr->eval_double(), m_expr->eval_int());
+        break;
+      } case STRING: {
+        m_symbol->set(expr->eval_string(), m_expr->eval_int());
+        break;
+      } default: {
+        assert(false && "Error");
+      }
+    }
+  } else {
+    switch(m_symbol->get_type()) {
+      case INT: {
+        m_symbol->set(expr->eval_int());
+        break;
+      } case DOUBLE: {
+        m_symbol->set(expr->eval_double());
+        break;
+      } case STRING: {
+        m_symbol->set(expr->eval_string());
+        break;
+      } default: {
+        assert(false && "Error");
+      }
+    }
+  }
+}

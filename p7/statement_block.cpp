@@ -18,11 +18,8 @@ void Statement_block::insert(Statement* statement) {
 // Implement it for p7
 void Statement_block::execute()
 {
-  
-  // This function should be defined before it is ever called
-  // This assert will cause the program to abort if this function 
-  // is called before it is implemented.
-
-  // *** ==> Remove this assert when you implement this function
-  assert(false);
+  int size = m_statements.size();
+  for(int i = 0; i < size; i++) {
+    m_statements[i]->execute();
+  }
 }

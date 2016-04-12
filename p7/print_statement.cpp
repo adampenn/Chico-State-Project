@@ -6,5 +6,5 @@ Print_statement::Print_statement(Expression *expr, int line) {
 }
 
 void Print_statement::execute() {
-  cout << "Print [" << m_line << "] " << m_expr->eval_string() << endl;
+  cout << "print[" << m_line << "]: " << m_expr->eval_string() << endl;
 }

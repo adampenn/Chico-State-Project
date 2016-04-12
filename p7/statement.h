@@ -4,7 +4,7 @@
 class Statement {
   public:
     Statement();
-    virtual void execute();
+    virtual void execute() = 0;
 };
 
 
