@@ -2,7 +2,6 @@
 
 #include "event_manager.h"
 #include "gpl_assert.h"
-using namespace std;
 
 /* static */ Event_manager *Event_manager::m_instance = 0;
 
@@ -21,12 +20,17 @@ Event_manager::~Event_manager()
 {
 }
 
-Event_manager::insert(Window::Keystroke keystroke, Statement_block*) {
-  m_events[keystroke].push_back(statement_block);
+void Event_manager::insert(int key, Statement_block* statement_block) {
+  m_events[key].push_back(statement_block);
 }
 
 void Event_manager::execute_handlers(Window::Keystroke keystroke)
 {
+  int size = m_events[keystroke].size();
+  for (int i = 0; i < size; i++) {
+    m_events[keystroke][i]->execute();
+  }
+
 /*
   switch(keystroke) {
     case SPACE: {

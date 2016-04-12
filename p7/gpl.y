@@ -204,7 +204,7 @@ Expression* create_unary_expression(Expression *left,
 %type <union_expression>  optional_initializer
 %type <union_variable>	  variable
 %type <union_operator>	  math_operator
-%type <union_statement_block> statement_block_creator
+%type <union_statement_block>   end_of_statement_block
 %type <union_int>   keystroke
 %type <union_statement_block>  statement_block
 
@@ -616,95 +616,95 @@ on_block:
 keystroke:
     T_SPACE
     {
-      $$ = WINDOW::SPACE;
+      $$ = Window::SPACE;
     }
     | T_UPARROW
     {
-      $$ = UPARROW;
+      $$ = Window::UPARROW;
     }
     | T_DOWNARROW
     {
-      $$ = DOWNARROW;
+      $$ = Window::DOWNARROW;
     }
     | T_LEFTARROW
     {
-      $$ = LEFTARROW;
+      $$ = Window::LEFTARROW;
     }
     | T_RIGHTARROW
     {
-      $$ = RIGHTARROW;
+      $$ = Window::RIGHTARROW;
     }
     | T_LEFTMOUSE_DOWN
     {
-      $$ = LEFTMOUSE_DOWN;
+      $$ = Window::LEFTMOUSE_DOWN;
     }
     | T_MIDDLEMOUSE_DOWN
     {
-      $$ = MIDDLEMOUSE_DOWN
+      $$ = Window::MIDDLEMOUSE_DOWN;
     }
     | T_RIGHTMOUSE_DOWN
     {
-      $$ = RIGHTMOUSE_DOWN;
+      $$ = Window::RIGHTMOUSE_DOWN;
     }
     | T_LEFTMOUSE_UP
     {
-      $$ = LEFTMOUSE_UP;
+      $$ = Window::LEFTMOUSE_UP;
     }
     | T_MIDDLEMOUSE_UP
     {
-      $$ = MIDDLEMOUSE_UP;
+      $$ = Window::MIDDLEMOUSE_UP;
     }
     | T_RIGHTMOUSE_UP
     {
-      $$ = RIGHTMOUSE_UP;
+      $$ = Window::RIGHTMOUSE_UP;
     }
     | T_MOUSE_MOVE
     {
-      $$ = MOUSE_MOVE;
+      $$ = Window::MOUSE_MOVE;
     }
     | T_MOUSE_DRAG
     {
-      $$ = MOUSE_DRAG;
+      $$ = Window::MOUSE_DRAG;
     }
     | T_AKEY
     {
-      $$ = AKEY;
+      $$ = Window::AKEY;
     }
     | T_SKEY
     {
-      $$ = SKEY;
+      $$ = Window::SKEY;
     }
     | T_DKEY
     {
-      $$ = DKEY;
+      $$ = Window::DKEY;
     }
     | T_FKEY
     {
-      $$ = FKEY;
+      $$ = Window::FKEY;
     }
     | T_HKEY
     {
-      $$ = HKEY;
+      $$ = Window::HKEY;
     }
     | T_JKEY
     {
-      $$ = JKEY;
+      $$ = Window::JKEY;
     }
     | T_KKEY
     {
-      $$ = KKEY;
+      $$ = Window::KKEY;
     }
     | T_LKEY
     {
-      $$ = LKEY;
+      $$ = Window::LKEY;
     }
     | T_WKEY
     {
-      $$ = WKEY;
+      $$ = Window::WKEY;
     }
     | T_F1
     {
-      $$ = F1;
+      $$ = Window::F1;
     }
     ;
 
@@ -722,26 +722,23 @@ if_block:
 statement_block:
     T_LBRACE statement_block_creator statement_list T_RBRACE end_of_statement_block
     {
-      $$ = $2; 
+      $$ = $5; 
     }
     ;
 
 //---------------------------------------------------------------------
 statement_block_creator:
     {
-      Statement_block* block = new Statement_block();
-      statement_stack.push(block);
-      $$ = block;
+      statement_stack.push(new Statement_block());
     }
-    // this goes to nothing so that you can put an action here in p7
     ;
 
 //---------------------------------------------------------------------
 end_of_statement_block:
     {
+      $$ = statement_stack.top();
       statement_stack.pop();
     }
-    // this goes to nothing so that you can put an action here in p7
     ;
 
 //---------------------------------------------------------------------
@@ -774,7 +771,11 @@ for_statement:
 print_statement:
     T_PRINT T_LPAREN expression T_RPAREN
     {
-      // push new print statement onto statement block stack
+      Statement_block* block = statement_stack.top();
+      statement_stack.pop();
+      Statement* state = new Print_statement($3, line_count);
+      block->insert(state);
+      statement_stack.push(block);
     }
     ;
 
