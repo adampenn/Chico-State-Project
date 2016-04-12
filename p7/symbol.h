@@ -22,6 +22,7 @@ using std::cout;
 using std::ostream;
 using std::list;
 using std::endl;
+using std::vector;
 using std::to_string;
 
 #ifndef SYMBOL_H

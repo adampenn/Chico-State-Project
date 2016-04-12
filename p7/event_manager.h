@@ -34,6 +34,8 @@ class Event_manager
 
     void execute_handlers(Window::Keystroke keystroke);
 
+    void insert(int key, Statement_block* statement_block);
+
     ~Event_manager();
 
   private:
@@ -41,6 +43,8 @@ class Event_manager
     Event_manager();
 
     static Event_manager *m_instance;
+    
+    vector<Statement_block*> m_events[Window::NUMBER_OF_KEYS];
 
     // disable default copy constructor and default assignment
     // done as a precaution, they should never be called

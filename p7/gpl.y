@@ -19,11 +19,14 @@ extern int line_count;            // current line in the input; from record.l
 #include "parser.h"
 #include <iostream>
 #include <string>
+#include <stack>
 using namespace std;
 Symbol_table* table = Symbol_table::instance();
 Game_object* cur_object_under_construction = NULL;
 Gpl_type cur_object_type = NO_TYPE;
 string cur_object_name = "";
+stack<Statement_block*> statement_stack;
+Event_manager* event_manager = Event_manager::instance();
 // bison syntax to indicate the end of the header
 
 // Error checking
@@ -91,6 +94,8 @@ Expression* create_unary_expression(Expression *left,
  Expression	*union_expression;
  Variable	*union_variable;
  Symbol* union_symbol;
+ Statement_block* union_statement_block;
+ 
 }
 
 // turn on verbose (longer) error messages
@@ -199,7 +204,9 @@ Expression* create_unary_expression(Expression *left,
 %type <union_expression>  optional_initializer
 %type <union_variable>	  variable
 %type <union_operator>	  math_operator
-
+%type <union_statement_block> statement_block_creator
+%type <union_int>   keystroke
+%type <union_statement_block>  statement_block
 
 // special token that does not match any production
 // used for characters that are not part of the language
@@ -600,33 +607,105 @@ check_animation_parameter:
 //---------------------------------------------------------------------
 on_block:
     T_ON keystroke statement_block
+    {
+      event_manager->insert($2, $3);
+    }
     ;
 
 //---------------------------------------------------------------------
 keystroke:
     T_SPACE
+    {
+      $$ = WINDOW::SPACE;
+    }
     | T_UPARROW
+    {
+      $$ = UPARROW;
+    }
     | T_DOWNARROW
+    {
+      $$ = DOWNARROW;
+    }
     | T_LEFTARROW
+    {
+      $$ = LEFTARROW;
+    }
     | T_RIGHTARROW
+    {
+      $$ = RIGHTARROW;
+    }
     | T_LEFTMOUSE_DOWN
+    {
+      $$ = LEFTMOUSE_DOWN;
+    }
     | T_MIDDLEMOUSE_DOWN
+    {
+      $$ = MIDDLEMOUSE_DOWN
+    }
     | T_RIGHTMOUSE_DOWN
+    {
+      $$ = RIGHTMOUSE_DOWN;
+    }
     | T_LEFTMOUSE_UP
+    {
+      $$ = LEFTMOUSE_UP;
+    }
     | T_MIDDLEMOUSE_UP
+    {
+      $$ = MIDDLEMOUSE_UP;
+    }
     | T_RIGHTMOUSE_UP
+    {
+      $$ = RIGHTMOUSE_UP;
+    }
     | T_MOUSE_MOVE
+    {
+      $$ = MOUSE_MOVE;
+    }
     | T_MOUSE_DRAG
-    | T_AKEY 
-    | T_SKEY 
-    | T_DKEY 
-    | T_FKEY 
-    | T_HKEY 
-    | T_JKEY 
-    | T_KKEY 
-    | T_LKEY 
-    | T_WKEY 
+    {
+      $$ = MOUSE_DRAG;
+    }
+    | T_AKEY
+    {
+      $$ = AKEY;
+    }
+    | T_SKEY
+    {
+      $$ = SKEY;
+    }
+    | T_DKEY
+    {
+      $$ = DKEY;
+    }
+    | T_FKEY
+    {
+      $$ = FKEY;
+    }
+    | T_HKEY
+    {
+      $$ = HKEY;
+    }
+    | T_JKEY
+    {
+      $$ = JKEY;
+    }
+    | T_KKEY
+    {
+      $$ = KKEY;
+    }
+    | T_LKEY
+    {
+      $$ = LKEY;
+    }
+    | T_WKEY
+    {
+      $$ = WKEY;
+    }
     | T_F1
+    {
+      $$ = F1;
+    }
     ;
 
 //---------------------------------------------------------------------
@@ -642,15 +721,26 @@ if_block:
 //---------------------------------------------------------------------
 statement_block:
     T_LBRACE statement_block_creator statement_list T_RBRACE end_of_statement_block
+    {
+      $$ = $2; 
+    }
     ;
 
 //---------------------------------------------------------------------
 statement_block_creator:
+    {
+      Statement_block* block = new Statement_block();
+      statement_stack.push(block);
+      $$ = block;
+    }
     // this goes to nothing so that you can put an action here in p7
     ;
 
 //---------------------------------------------------------------------
 end_of_statement_block:
+    {
+      statement_stack.pop();
+    }
     // this goes to nothing so that you can put an action here in p7
     ;
 
@@ -683,6 +773,9 @@ for_statement:
 //---------------------------------------------------------------------
 print_statement:
     T_PRINT T_LPAREN expression T_RPAREN
+    {
+      // push new print statement onto statement block stack
+    }
     ;
 
 //---------------------------------------------------------------------

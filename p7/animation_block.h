@@ -28,8 +28,7 @@
 #include "statement_block.h"
 class Symbol;
 
-class Animation_block : public Statement_block
-{
+class Animation_block : public Statement_block {
   public:
     Animation_block() {}; // relies on default parameters
     void initialize(Symbol *parameter_symbol, std::string name);

@@ -17,6 +17,9 @@
 #define STATEMENT_BLOCK_H
 
 #include <iostream>
+#include "statement.h"
+#include <vector>
+using std::vector;
 
 class Game_object;
 
@@ -24,11 +27,12 @@ class Statement_block
 {
   public:
     Statement_block();
-
+    void insert(Statement* statement);
     // This is called when a statement block is executed
     // Implement it for p7
     void execute();
-  
+  private:
+    vector<Statement*> m_statements;
 };
 
 #endif // #ifndef STATEMENT_BLOCK_H

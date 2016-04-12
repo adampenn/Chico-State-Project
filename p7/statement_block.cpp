@@ -10,10 +10,15 @@ Statement_block::Statement_block()
 
 }
 
+void Statement_block::insert(Statement* statement) {
+  m_statements.push_back(statement);
+}
+
 // this function is called for all non-animation_block statement_blocks
 // Implement it for p7
 void Statement_block::execute()
 {
+  
   // This function should be defined before it is ever called
   // This assert will cause the program to abort if this function 
   // is called before it is implemented.
