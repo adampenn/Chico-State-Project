@@ -712,7 +712,13 @@ keystroke:
 //---------------------------------------------------------------------
 if_block:
     statement_block_creator statement end_of_statement_block
+    {
+      $$ = $3;
+    }
     | statement_block
+    {
+      $$ = $1;
+    }
     ;
 
 //---------------------------------------------------------------------
@@ -757,19 +763,11 @@ statement:
 if_statement:
     T_IF T_LPAREN expression T_RPAREN if_block %prec IF_NO_ELSE
     {
-      Statement_block* block = statement_stack.top();
-      statement_stack.pop();
-      Statement* state = new If_statement($3, $5, NULL);
-      block->insert(state);
-      statement_stack.push(block);
+      statement_stack.top()->insert(new If_statement($3, $5, NULL));
     }
     | T_IF T_LPAREN expression T_RPAREN if_block T_ELSE if_block
     {
-      Statement_block* block = statement_stack.top();
-      statement_stack.pop();
-      Statement* state = new If_statement($3, $5, $7);
-      block->insert(state);
-      statement_stack.push(block);
+      statement_stack.top()->insert(new If_statement($3, $5, $7));
     }
     ;
 
