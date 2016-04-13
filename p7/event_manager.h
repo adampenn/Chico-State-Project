@@ -23,6 +23,8 @@
 #include <vector>
 #include "window.h" // for Keystroke enum
 #include "print_statement.h"
+#include "assignment_statement.h"
+#include "if_statement.h"
 
 using namespace std;
 

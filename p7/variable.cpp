@@ -143,6 +143,12 @@ void Variable::set(Expression* expr) {
       } case STRING: {
         m_symbol->set(expr->eval_string(), m_expr->eval_int());
         break;
+      } case GAME_OBJECT: {
+        if (m_field == NULL) {
+          assert(false);
+        }
+        m_symbol->get_game_object_value(m_expr->eval_int())->set_member_variable(*m_field, expr->eval_int());
+        break;
       } default: {
         assert(false && "Error");
       }
@@ -157,6 +163,12 @@ void Variable::set(Expression* expr) {
         break;
       } case STRING: {
         m_symbol->set(expr->eval_string());
+        break;
+      } case GAME_OBJECT: {
+        if (m_field == NULL) {
+          assert(false);
+        }
+        m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_int());
         break;
       } default: {
         assert(false && "Error");

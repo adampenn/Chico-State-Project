@@ -14,8 +14,6 @@ void Statement_block::insert(Statement* statement) {
   m_statements.push_back(statement);
 }
 
-// this function is called for all non-animation_block statement_blocks
-// Implement it for p7
 void Statement_block::execute()
 {
   int size = m_statements.size();

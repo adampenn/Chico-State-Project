@@ -207,7 +207,7 @@ Expression* create_unary_expression(Expression *left,
 %type <union_statement_block>   end_of_statement_block
 %type <union_int>   keystroke
 %type <union_statement_block>  statement_block
-
+%type <union_statement_block> if_block
 // special token that does not match any production
 // used for characters that are not part of the language
 %token T_ERROR               "error"
@@ -711,11 +711,7 @@ keystroke:
 
 //---------------------------------------------------------------------
 if_block:
-    statement_block_creator
-    {
-      
-    }
-    statement end_of_statement_block
+    statement_block_creator statement end_of_statement_block
     | statement_block
     ;
 
@@ -760,7 +756,21 @@ statement:
 //---------------------------------------------------------------------
 if_statement:
     T_IF T_LPAREN expression T_RPAREN if_block %prec IF_NO_ELSE
+    {
+      Statement_block* block = statement_stack.top();
+      statement_stack.pop();
+      Statement* state = new If_statement($3, $5, NULL);
+      block->insert(state);
+      statement_stack.push(block);
+    }
     | T_IF T_LPAREN expression T_RPAREN if_block T_ELSE if_block
+    {
+      Statement_block* block = statement_stack.top();
+      statement_stack.pop();
+      Statement* state = new If_statement($3, $5, $7);
+      block->insert(state);
+      statement_stack.push(block);
+    }
     ;
 
 //---------------------------------------------------------------------
@@ -789,7 +799,11 @@ exit_statement:
 assign_statement:
     variable T_ASSIGN expression
     {
-      $1->set($3);
+      Statement_block* block = statement_stack.top();
+      statement_stack.pop();
+      Statement* state = new Assignment_statement($1, $3, EQUAL);
+      block->insert(state);
+      statement_stack.push(block);
     }
     | variable T_PLUS_ASSIGN expression
     | variable T_MINUS_ASSIGN expression
