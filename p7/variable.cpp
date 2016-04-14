@@ -28,6 +28,10 @@ Gpl_type Variable::get_type() {
   return m_type;
 }
 
+string Variable::get_name() const {
+  return m_symbol->get_name();
+}
+
 int Variable::get_int_value() {
   if (m_expr != NULL) {
     if (m_field != NULL) {

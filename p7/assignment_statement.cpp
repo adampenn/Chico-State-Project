@@ -47,7 +47,7 @@ void Assignment_statement::execute() {
         Expression* expr = new Expression(init_val-minus_val);
         m_left->set(expr);
         break;
-      } default: {
+      }default: {
         assert(false && "incorrect type");
       }
     }

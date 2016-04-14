@@ -804,6 +804,11 @@ assign_statement:
             Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
           }
           break;
+        } case DOUBLE: {
+          if ($3->get_type() == STRING) {
+            Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
+          }
+          break;
         }
       }
       statement_stack.top()->insert(new Assignment_statement($1, $3, EQUAL));
@@ -813,7 +818,12 @@ assign_statement:
       switch ($1->get_type()) {
         case INT: {
           if ($3->get_type() != INT) {
-            Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
+            Error::error(Error::PLUS_ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
+          }
+          break;
+        } case DOUBLE: {
+          if ($3->get_type() == STRING) {
+            Error::error(Error::PLUS_ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
           }
           break;
         }
@@ -824,9 +834,16 @@ assign_statement:
       switch ($1->get_type()) {
         case INT: {
           if ($3->get_type() != INT) {
-            Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
+            Error::error(Error::MINUS_ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
           }
           break;
+        } case DOUBLE: {
+          if ($3->get_type() == STRING) {
+            Error::error(Error::MINUS_ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
+          }
+          break;
+        } case STRING: {
+          Error::error(Error::INVALID_LHS_OF_MINUS_ASSIGNMENT, $1->get_name(), gpl_type_to_string($3->get_type()));
         }
       }
       statement_stack.top()->insert(new Assignment_statement($1, $3, MINUS));
