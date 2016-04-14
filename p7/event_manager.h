@@ -25,6 +25,8 @@
 #include "print_statement.h"
 #include "assignment_statement.h"
 #include "if_statement.h"
+#include "exit_statement.h"
+#include "for_statement.h"
 
 using namespace std;
 

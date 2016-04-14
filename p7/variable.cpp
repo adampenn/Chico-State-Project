@@ -147,14 +147,27 @@ void Variable::set(Expression* expr) {
         if (m_field == NULL) {
           assert(false);
         }
-        m_symbol->get_game_object_value(m_expr->eval_int())->set_member_variable(*m_field, expr->eval_int());
+        switch (expr->get_type()) {
+          case INT: {
+            m_symbol->get_game_object_value(m_expr->eval_int())->set_member_variable(*m_field, expr->eval_int());
+            break;
+          } case DOUBLE: {
+            m_symbol->get_game_object_value(m_expr->eval_int())->set_member_variable(*m_field, expr->eval_double());
+            break;
+          } case STRING: {
+            m_symbol->get_game_object_value(m_expr->eval_int())->set_member_variable(*m_field, expr->eval_string());
+            break;
+          } default: {
+            assert(false && "Error");
+          }
+        }
         break;
       } default: {
         assert(false && "Error");
       }
     }
   } else {
-    switch(m_symbol->get_type()) {
+    switch(m_symbol->get_base_type()) {
       case INT: {
         m_symbol->set(expr->eval_int());
         break;
@@ -168,7 +181,20 @@ void Variable::set(Expression* expr) {
         if (m_field == NULL) {
           assert(false);
         }
-        m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_int());
+        switch (expr->get_type()) {
+          case INT: {
+            m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_int());
+            break;
+          } case DOUBLE: {
+            m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_double());
+            break;
+          } case STRING: {
+            m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_string());
+            break;
+          } default: {
+            assert(false && "Error");
+          }
+        }
         break;
       } default: {
         assert(false && "Error");

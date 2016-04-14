@@ -608,7 +608,6 @@ check_animation_parameter:
 on_block:
     T_ON keystroke statement_block
     {
-      int key = $2;
       event_manager->insert($2, $3);
     }
     ;
@@ -774,37 +773,40 @@ if_statement:
 //---------------------------------------------------------------------
 for_statement:
     T_FOR T_LPAREN statement_block_creator assign_statement end_of_statement_block T_SEMIC expression T_SEMIC statement_block_creator assign_statement end_of_statement_block T_RPAREN statement_block
+    {
+      statement_stack.top()->insert(new For_statement($5, $7, $11, $13));
+    }
     ;
 
 //---------------------------------------------------------------------
 print_statement:
     T_PRINT T_LPAREN expression T_RPAREN
     {
-      Statement_block* block = statement_stack.top();
-      statement_stack.pop();
-      Statement* state = new Print_statement($3, line_count);
-      block->insert(state);
-      statement_stack.push(block);
+      statement_stack.top()->insert(new Print_statement($3, line_count));
     }
     ;
 
 //---------------------------------------------------------------------
 exit_statement:
     T_EXIT T_LPAREN expression T_RPAREN
+    {
+      statement_stack.top()->insert(new Exit_statement($3, line_count));
+    }
     ;
 
 //---------------------------------------------------------------------
 assign_statement:
     variable T_ASSIGN expression
     {
-      Statement_block* block = statement_stack.top();
-      statement_stack.pop();
-      Statement* state = new Assignment_statement($1, $3, EQUAL);
-      block->insert(state);
-      statement_stack.push(block);
+      statement_stack.top()->insert(new Assignment_statement($1, $3, EQUAL));
     }
     | variable T_PLUS_ASSIGN expression
-    | variable T_MINUS_ASSIGN expression
+    {
+      statement_stack.top()->insert(new Assignment_statement($1, $3, PLUS));
+    }
+    | variable T_MINUS_ASSIGN expression {
+      statement_stack.top()->insert(new Assignment_statement($1, $3, MINUS));
+    }
     ;
 
 //---------------------------------------------------------------------
