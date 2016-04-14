@@ -137,6 +137,11 @@ Animation_block* Variable::get_animation_block_value() {
 
 void Variable::set(Expression* expr) {
   if (m_expr != NULL) {
+    if (m_expr->eval_int() >= m_symbol->get_size() || m_expr->eval_int() < 0) {
+      stringstream index;
+      index << m_expr->eval_int();
+      Error::error(Error::ARRAY_INDEX_OUT_OF_BOUNDS, m_symbol->get_name(), index.str());
+    }
     switch(m_symbol->get_base_type()) {
       case INT: {
         m_symbol->set(expr->eval_int(), m_expr->eval_int());

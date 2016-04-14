@@ -41,6 +41,7 @@ class Symbol {
     Symbol(string name, string value);
     Gpl_type get_type();
     Gpl_type get_base_type();
+    int get_size() const;
     void set(int value, int index = UNDEFINED_INDEX);
     void set(double value, int index = UNDEFINED_INDEX);
     void set(string value, int index = UNDEFINED_INDEX);

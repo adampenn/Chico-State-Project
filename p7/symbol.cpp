@@ -107,8 +107,12 @@ Gpl_type Symbol::get_type(){
   return m_type;
 }
 
-string Symbol::get_name() const{
+string Symbol::get_name() const {
   return m_name;
+}
+
+int Symbol::get_size() const {
+  return m_size;
 }
 
 Gpl_type Symbol::get_base_type(){
@@ -133,6 +137,9 @@ void Symbol::set(int value, int index) {
     *((int *) m_value) = value;
   } else {
     assert(m_type == INT_ARRAY);
+    if (index >= m_size || index < 0) {
+      index = 0;
+    }
     ((int *)m_value)[index] = value;
   }
 }
@@ -143,6 +150,9 @@ void Symbol::set(double value, int index) {
     *((double *) m_value) = value;
   } else {
     assert(m_type == DOUBLE_ARRAY);
+    if (index >= m_size || index < 0) {
+      index = 0;
+    }
     ((double *)m_value)[index] = value;
   }
 }
@@ -153,6 +163,9 @@ void Symbol::set(string value, int index) {
     *((string *) m_value) = value;
   } else {
     assert(m_type == STRING_ARRAY);
+    if (index >= m_size || index < 0) {
+      index = 0;
+    }
     ((string *)m_value)[index] = value;
   }
 }

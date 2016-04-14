@@ -762,11 +762,19 @@ statement:
 if_statement:
     T_IF T_LPAREN expression T_RPAREN if_block %prec IF_NO_ELSE
     {
-      statement_stack.top()->insert(new If_statement($3, $5, NULL));
+      if ($3->get_type() != INT) {
+        Error::error(Error::INVALID_TYPE_FOR_IF_STMT_EXPRESSION);
+      } else {
+        statement_stack.top()->insert(new If_statement($3, $5, NULL));
+      }
     }
     | T_IF T_LPAREN expression T_RPAREN if_block T_ELSE if_block
     {
-      statement_stack.top()->insert(new If_statement($3, $5, $7));
+      if ($3->get_type() != INT) {
+        Error::error(Error::INVALID_TYPE_FOR_IF_STMT_EXPRESSION);
+      } else {
+        statement_stack.top()->insert(new If_statement($3, $5, $7));
+      }
     }
     ;
 
@@ -774,7 +782,11 @@ if_statement:
 for_statement:
     T_FOR T_LPAREN statement_block_creator assign_statement end_of_statement_block T_SEMIC expression T_SEMIC statement_block_creator assign_statement end_of_statement_block T_RPAREN statement_block
     {
-      statement_stack.top()->insert(new For_statement($5, $7, $11, $13));
+      if ($7->get_type() != INT) {
+        Error::error(Error::INVALID_TYPE_FOR_FOR_STMT_EXPRESSION);
+      } else {
+        statement_stack.top()->insert(new For_statement($5, $7, $11, $13));
+      }
     }
     ;
 
@@ -790,7 +802,11 @@ print_statement:
 exit_statement:
     T_EXIT T_LPAREN expression T_RPAREN
     {
-      statement_stack.top()->insert(new Exit_statement($3, line_count));
+      if ($3->get_type() != INT) {
+        Error::error(Error::EXIT_STATUS_MUST_BE_AN_INTEGER, gpl_type_to_string($3->get_type()));
+      } else {
+        statement_stack.top()->insert(new Exit_statement($3, line_count));
+      }
     }
     ;
 
@@ -809,6 +825,10 @@ assign_statement:
             Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
           }
           break;
+        } case STRING: {
+          break;
+        } default: {
+          Error::error(Error::INVALID_LHS_OF_ASSIGNMENT, $1->get_name(), gpl_type_to_string($3->get_type()));
         }
       }
       statement_stack.top()->insert(new Assignment_statement($1, $3, EQUAL));
@@ -842,7 +862,7 @@ assign_statement:
             Error::error(Error::MINUS_ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
           }
           break;
-        } case STRING: {
+        } default: {
           Error::error(Error::INVALID_LHS_OF_MINUS_ASSIGNMENT, $1->get_name(), gpl_type_to_string($3->get_type()));
         }
       }
@@ -859,20 +879,28 @@ variable:
         $$ = new Variable(symbol);
       } else {
         Error::error(Error::UNDECLARED_VARIABLE, *$1);
-        $$ = new Variable(new Symbol(*$1, 0));
+        $$ = new Variable(symbol);
       }
     }
     | T_ID T_LBRACKET expression T_RBRACKET
     {
-      Symbol* symbol = table->lookup(*$1);
-      if (symbol == NULL) {
-       Error::error(Error::UNDECLARED_VARIABLE, *$1);
+      if ($3->get_type() != INT) {
+        if ($3->get_type() == DOUBLE) {
+	        Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, *$1, "A double expression");
+        } else if ($3->get_type() == STRING) {
+	        Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, *$1, "A string expression");
+        }
       } else {
-        if (!(symbol->get_type() & ARRAY)) {
-	        Error::error(Error::VARIABLE_NOT_AN_ARRAY, *$1);
-          $$ = new Variable(symbol);
+        Symbol* symbol = table->lookup(*$1);
+        if (symbol == NULL) {
+         Error::error(Error::UNDECLARED_VARIABLE, *$1);
         } else {
-          $$ = new Variable(symbol, $3);
+          if (!(symbol->get_type() & ARRAY)) {
+  	        Error::error(Error::VARIABLE_NOT_AN_ARRAY, *$1);
+            $$ = new Variable(symbol);
+          } else {
+            $$ = new Variable(symbol, $3);
+          }
         }
       }
     }

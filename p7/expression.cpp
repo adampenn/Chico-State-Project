@@ -75,6 +75,8 @@ Expression::Expression(Expression* left, Operator_type oper, Expression* right) 
     m_type = DOUBLE;
   } else if (oper == UNARY_MINUS && (left->get_type() == INT || right->get_type() == INT)) {
     m_type = INT;
+  } else {
+    assert(false && "Error");
   }
 }
 
