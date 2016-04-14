@@ -798,13 +798,37 @@ exit_statement:
 assign_statement:
     variable T_ASSIGN expression
     {
+      switch ($1->get_type()) {
+        case INT: {
+          if ($3->get_type() != INT) {
+            Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
+          }
+          break;
+        }
+      }
       statement_stack.top()->insert(new Assignment_statement($1, $3, EQUAL));
     }
     | variable T_PLUS_ASSIGN expression
     {
+      switch ($1->get_type()) {
+        case INT: {
+          if ($3->get_type() != INT) {
+            Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
+          }
+          break;
+        }
+      }
       statement_stack.top()->insert(new Assignment_statement($1, $3, PLUS));
     }
     | variable T_MINUS_ASSIGN expression {
+      switch ($1->get_type()) {
+        case INT: {
+          if ($3->get_type() != INT) {
+            Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
+          }
+          break;
+        }
+      }
       statement_stack.top()->insert(new Assignment_statement($1, $3, MINUS));
     }
     ;
