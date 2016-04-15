@@ -176,11 +176,11 @@ int Symbol::get_int_value(int index) const{
     return *((int *) m_value);
   } else {
     assert(m_type == INT_ARRAY);
-    if (index > m_size) {
+    if (index > m_size || index < 0) {
       stringstream ss;
       ss << index;
 	    Error::error(Error::ARRAY_INDEX_OUT_OF_BOUNDS, m_name, ss.str());
-      return INT_MIN;
+      return ((int *)m_value)[0];
     } else {
       return ((int *)m_value)[index];
     }
@@ -192,11 +192,11 @@ double Symbol::get_double_value(int index) const{
     assert(m_type == DOUBLE);
     return *((double *)m_value);
   } else {
-    if (index > m_size) {
+    if (index > m_size || index < 0) {
       stringstream ss;
       ss << index;
 	    Error::error(Error::ARRAY_INDEX_OUT_OF_BOUNDS, m_name, ss.str());
-      return INT_MIN;
+      return ((double *)m_value)[0];
     } else {
       assert(m_type == DOUBLE_ARRAY);
       return ((double *)m_value)[index];
@@ -209,11 +209,11 @@ string Symbol::get_string_value(int index) const{
     assert(m_type == STRING);
     return *((string *)m_value);
   } else {
-    if (index > m_size) {
+    if (index > m_size || index < 0) {
       stringstream ss;
       ss << index;
 	    Error::error(Error::ARRAY_INDEX_OUT_OF_BOUNDS, m_name, ss.str());
-      return "";
+      return ((string *)m_value)[0];
     } else {
       assert(m_type == STRING_ARRAY);
       return ((string *)m_value)[index];
@@ -225,11 +225,11 @@ Game_object *Symbol::get_game_object_value(int index) const{
   if (index == UNDEFINED_INDEX) {
     return (Game_object *) m_value;
   } else {
-    if (index > m_size) {
+    if (index > m_size || index < 0) {
       stringstream ss;
       ss << index;
 	    Error::error(Error::ARRAY_INDEX_OUT_OF_BOUNDS, m_name, ss.str());
-      return NULL;
+      return ((Game_object**)m_value)[0];
     } else {
       assert(m_type & GAME_OBJECT_ARRAY);
       return ((Game_object**)m_value)[index];

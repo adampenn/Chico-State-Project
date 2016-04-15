@@ -8,7 +8,12 @@ Variable::Variable(Symbol* symbol, string* field /* = NULL */) {
     m_field = field;
     symbol->get_game_object_value()->get_member_variable_type(*m_field, m_type);
   } else {
-    m_type = m_symbol->get_base_type();
+    m_field = NULL;
+    if (m_symbol->get_base_type() & GAME_OBJECT) {
+      m_type = m_symbol->get_type();
+    } else {
+      m_type = m_symbol->get_base_type();
+    }
   }
 }
 
@@ -18,9 +23,14 @@ Variable::Variable(Symbol* symbol, Expression* expr, string* field /* = NULL */)
   m_expr = expr;
   if (field != NULL) {
     m_field = field;
-    symbol->get_game_object_value(expr->eval_int())->get_member_variable_type(*m_field, m_type);
+    symbol->get_game_object_value(0)->get_member_variable_type(*m_field, m_type);
   } else {
-    m_type = m_symbol->get_base_type();
+    m_field = NULL;
+    if (m_symbol->get_base_type() & GAME_OBJECT) {
+      m_type = m_symbol->get_type();
+    } else {
+      m_type = m_symbol->get_base_type();
+    }
   }
 }
 
@@ -137,6 +147,13 @@ Animation_block* Variable::get_animation_block_value() {
 
 void Variable::set(Expression* expr) {
   if (m_expr != NULL) {
+    if (m_expr->get_type() == DOUBLE) {
+	    Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, m_symbol->get_name(), "A double expression");
+      return;
+    } else if (m_expr->get_type() == STRING) {
+	    Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, m_symbol->get_name(), "A string expression");
+      return;
+    }
     if (m_expr->eval_int() >= m_symbol->get_size() || m_expr->eval_int() < 0) {
       stringstream index;
       index << m_expr->eval_int();

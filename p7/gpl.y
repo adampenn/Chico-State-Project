@@ -794,7 +794,19 @@ for_statement:
 print_statement:
     T_PRINT T_LPAREN expression T_RPAREN
     {
-      statement_stack.top()->insert(new Print_statement($3, line_count));
+      bool set = true;
+      switch($3->get_type()) {
+        case INT:
+        case DOUBLE:
+        case STRING:
+          break;
+        default:
+          Error::error(Error::INVALID_TYPE_FOR_PRINT_STMT_EXPRESSION);
+          set = false;
+      }
+      if (set) {
+        statement_stack.top()->insert(new Print_statement($3, line_count));
+      }
     }
     ;
 
@@ -828,7 +840,11 @@ assign_statement:
         } case STRING: {
           break;
         } default: {
-          Error::error(Error::INVALID_LHS_OF_ASSIGNMENT, $1->get_name(), gpl_type_to_string($3->get_type()));
+          if ($1->get_type() & GAME_OBJECT) {
+            Error::error(Error::INVALID_LHS_OF_ASSIGNMENT, $1->get_name(), gpl_type_to_string($1->get_type()));
+          } else {
+            Error::error(Error::INVALID_LHS_OF_ASSIGNMENT, $1->get_name(), gpl_type_to_string($3->get_type()));
+          }
         }
       }
       statement_stack.top()->insert(new Assignment_statement($1, $3, EQUAL));
@@ -846,6 +862,14 @@ assign_statement:
             Error::error(Error::PLUS_ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
           }
           break;
+        } case STRING: {
+          break;
+        } default: {
+          if ($1->get_type() & GAME_OBJECT) {
+            Error::error(Error::INVALID_LHS_OF_PLUS_ASSIGNMENT, $1->get_name(), gpl_type_to_string($1->get_type()));
+          } else {
+            Error::error(Error::INVALID_LHS_OF_PLUS_ASSIGNMENT, $1->get_name(), gpl_type_to_string($3->get_type()));
+          }
         }
       }
       statement_stack.top()->insert(new Assignment_statement($1, $3, PLUS));
@@ -863,7 +887,11 @@ assign_statement:
           }
           break;
         } default: {
-          Error::error(Error::INVALID_LHS_OF_MINUS_ASSIGNMENT, $1->get_name(), gpl_type_to_string($3->get_type()));
+          if ($1->get_type() & GAME_OBJECT) {
+            Error::error(Error::INVALID_LHS_OF_MINUS_ASSIGNMENT, $1->get_name(), gpl_type_to_string($1->get_type()));
+          } else {
+            Error::error(Error::INVALID_LHS_OF_MINUS_ASSIGNMENT, $1->get_name(), gpl_type_to_string($3->get_type()));
+          }
         }
       }
       statement_stack.top()->insert(new Assignment_statement($1, $3, MINUS));
@@ -930,28 +958,33 @@ variable:
     | T_ID T_LBRACKET expression T_RBRACKET T_PERIOD T_ID
     {
       Symbol* symbol = table->lookup(*$1);
+      bool bad_index;
       if (symbol != NULL) {
         Game_object* game_object = NULL;
         if (symbol->get_base_type() == GAME_OBJECT) {
       	  if ($3->get_type() != INT) {
             stringstream ss;
             if ($3->get_type() == DOUBLE) {
-              ss << $3->eval_double();
-	            Error::error(Error::INVALID_ARRAY_SIZE, *$1, ss.str());
+	            Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, symbol->get_name(), "A double expression");
             } else if ( $3->get_type() == STRING) {
-              ss << $3->eval_string();
-	            Error::error(Error::INVALID_ARRAY_SIZE, *$1, ss.str());
+	            Error::error(Error::ARRAY_INDEX_MUST_BE_AN_INTEGER, symbol->get_name(), "A string expression");
             }
+            bad_index = true;
+            game_object = symbol->get_game_object_value(0);
 	        } else {
             int index = $3->eval_int();
-            game_object = symbol->get_game_object_value(index);
+            game_object = symbol->get_game_object_value(0);
           }
           Gpl_type type;
           switch(game_object->get_member_variable_type(*$6, type)) {
             case MEMBER_NOT_DECLARED: {
               Error::error(Error::UNDECLARED_MEMBER, *$1, *$6);
             } case OK: {
-              $$ = new Variable(symbol, $3, $6);
+              if (bad_index) {
+                $$ = new Variable(symbol, new Expression(0), $6);
+              } else {
+                $$ = new Variable(symbol, $3, $6);
+              }
             }
           }
         } else {
