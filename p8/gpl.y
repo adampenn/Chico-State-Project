@@ -552,15 +552,18 @@ block:
 //---------------------------------------------------------------------
 initialization_block:
     T_INITIALIZATION statement_block
+    {
+      event_manager->insert(23, $2);
+    }
     ;
 
 //---------------------------------------------------------------------
 animation_block:
     T_ANIMATION T_ID T_LPAREN check_animation_parameter T_RPAREN T_LBRACE
     {
-      Symbol* symbol = symbol_table->lookup(*$2);
+      Symbol* symbol = table->lookup(*$2);
       if (symbol != NULL) {
-        statement_stack.push($4);
+        //statement_stack.push($4);
       } else {
 
       }
