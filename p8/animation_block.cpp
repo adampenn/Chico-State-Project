@@ -18,9 +18,9 @@ void Animation_block::initialize(Symbol *parameter_symbol, string name)
 
 void Animation_block::execute(Game_object *argument)
 {
-  Symbol* formal = m_parameter_symbol;
+  Game_object* formal = m_parameter_symbol->get_game_object_value();
   m_parameter_symbol->set_game_object(argument);
-  this->Statement_block::execute();
-  m_parameter_symbol = formal;
+  Statement_block::execute();
+  m_parameter_symbol->set_game_object(formal);
 }
 

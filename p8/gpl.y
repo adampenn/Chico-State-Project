@@ -559,17 +559,20 @@ initialization_block:
 
 //---------------------------------------------------------------------
 animation_block:
-    T_ANIMATION T_ID T_LPAREN check_animation_parameter T_RPAREN T_LBRACE
+    T_ANIMATION T_ID T_LPAREN check_animation_parameter
     {
       Symbol* symbol = table->lookup(*$2);
+      Animation_block* ab = NULL;
       if (symbol != NULL) {
-        //statement_stack.push($4);
+        statement_stack.push(symbol->get_animation_block_value());
       } else {
-
+        assert(false && "FINISH THIS P8");
       }
     }
-    statement_list T_RBRACE end_of_statement_block
+    T_RPAREN T_LBRACE statement_list T_RBRACE end_of_statement_block
     {
+      // What goes here
+      // I think nothing
     }
     ;
 
@@ -779,6 +782,7 @@ if_statement:
       if ($3->get_type() != INT) {
         Error::error(Error::INVALID_TYPE_FOR_IF_STMT_EXPRESSION);
       } else {
+        assert(!statement_stack.empty());
         statement_stack.top()->insert(new If_statement($3, $5, NULL));
       }
     }
@@ -852,6 +856,11 @@ assign_statement:
           }
           break;
         } case STRING: {
+          break;
+        } case ANIMATION_BLOCK: {
+          if ($3->get_type() != ANIMATION_BLOCK) {
+            Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
+          }
           break;
         } default: {
           if ($1->get_type() & GAME_OBJECT) {

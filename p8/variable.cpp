@@ -182,6 +182,9 @@ void Variable::set(Expression* expr) {
           } case STRING: {
             m_symbol->get_game_object_value(m_expr->eval_int())->set_member_variable(*m_field, expr->eval_string());
             break;
+          } case ANIMATION_BLOCK: {
+            m_symbol->get_game_object_value(m_expr->eval_int())->set_member_variable(*m_field, expr->eval_animation_block());
+            break;
           } default: {
             assert(false && "Error");
           }
@@ -216,6 +219,8 @@ void Variable::set(Expression* expr) {
           } case STRING: {
             m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_string());
             break;
+          } case ANIMATION_BLOCK: {
+            m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_animation_block());
           } default: {
             assert(false && "Error");
           }
