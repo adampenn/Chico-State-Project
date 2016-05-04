@@ -208,6 +208,7 @@ Expression* create_unary_expression(Expression *left,
 %type <union_int>   keystroke
 %type <union_statement_block>  statement_block
 %type <union_statement_block> if_block
+%type <union_string>          check_animation_parameter
 // special token that does not match any production
 // used for characters that are not part of the language
 %token T_ERROR               "error"
@@ -562,11 +563,15 @@ animation_block:
     T_ANIMATION T_ID T_LPAREN check_animation_parameter
     {
       Symbol* symbol = table->lookup(*$2);
+      Symbol* cap = table->lookup(*$4);
       Animation_block* ab = NULL;
       if (symbol != NULL) {
+       // if (symbol->get_animation_block_value()->get_parameter_symbol()->get_type() == cap.get_type()) {
+          // some miss match error
+        //}
         statement_stack.push(symbol->get_animation_block_value());
       } else {
-        assert(false && "FINISH THIS P8");
+        assert(false && "give error?");
       }
     }
     T_RPAREN T_LBRACE statement_list T_RBRACE end_of_statement_block
@@ -615,10 +620,25 @@ animation_parameter:
 //---------------------------------------------------------------------
 check_animation_parameter:
     T_TRIANGLE T_ID
+    {
+      $$ = $2;
+    }
     | T_PIXMAP T_ID
+    {
+      $$ = $2;
+    }
     | T_CIRCLE T_ID
+    {
+      $$ = $2;
+    }
     | T_RECTANGLE T_ID
+    {
+      $$ = $2;
+    }
     | T_TEXTBOX T_ID
+    {
+      $$ = $2;
+    }
     ;
 
 //---------------------------------------------------------------------

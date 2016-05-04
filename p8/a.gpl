@@ -1,0 +1,28 @@
+forward animation move(textbox, t);
+
+textbox boxes[3];
+
+initialization
+{
+  boxes[0].x = 100;
+  boxes[0].y = 100;
+  boxes[0].animation_block = move;
+  boxes[0].text = "ZERO";
+  boxes[1].x = 100;
+  boxes[1].y = 100;
+  boxes[0].text = "ONE";
+  boxes[1].animation_block = move;
+  boxes[2].x = 100;
+  boxes[2].y = 100;
+  boxes[0].text = "TWO";
+  boxes[2].animation_block = move;
+  
+}
+
+animation move(textbox t)
+{
+  if (t.x < 100) {
+    t.x += 1;
+    t.y += 1;
+  }
+}
