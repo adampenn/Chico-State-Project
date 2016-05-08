@@ -1,6 +1,9 @@
 #include "variable.h"
 
 Variable::Variable(Symbol* symbol, string* field /* = NULL */) {
+  if (symbol == NULL) {
+    return;
+  }
   m_symbol = symbol;
   m_value= NULL;
   m_expr = NULL;
@@ -33,12 +36,24 @@ Variable::Variable(Symbol* symbol, Expression* expr, string* field /* = NULL */)
   }
 }
 
+int Variable::get_index() const {
+  if (m_expr != NULL) {
+    return m_expr->eval_int();
+  } else {
+    return INT_MIN;
+  }
+}
+
 Gpl_type Variable::get_type() {
   return m_type;
 }
 
 string Variable::get_name() const {
   return m_symbol->get_name();
+}
+    
+Symbol* Variable::get_symbol() const {
+  return m_symbol;
 }
 
 int Variable::get_int_value() {
@@ -174,6 +189,10 @@ void Variable::set(Expression* expr) {
         }
         switch (expr->get_type()) {
           case INT: {
+            if (*m_field == "text") {
+              m_symbol->get_game_object_value(m_expr->eval_int())->set_member_variable(*m_field, expr->eval_string());
+              break;
+            }
             m_symbol->get_game_object_value(m_expr->eval_int())->set_member_variable(*m_field, expr->eval_int());
             break;
           } case DOUBLE: {
@@ -211,6 +230,9 @@ void Variable::set(Expression* expr) {
         }
         switch (expr->get_type()) {
           case INT: {
+            if (*m_field == "text") {
+              m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_string());
+            }
             m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_int());
             break;
           } case DOUBLE: {
@@ -221,6 +243,7 @@ void Variable::set(Expression* expr) {
             break;
           } case ANIMATION_BLOCK: {
             m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_animation_block());
+            break;
           } default: {
             assert(false && "Error");
           }
@@ -232,3 +255,4 @@ void Variable::set(Expression* expr) {
     }
   }
 }
+

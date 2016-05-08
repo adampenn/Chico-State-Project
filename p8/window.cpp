@@ -256,7 +256,7 @@ Window::Window(int x, int y, int w, int h, string title, int speed,
   else clock_tick = ((103 - speed) * (103 - speed))/10;
 */
 
-  clock_tick = .005;
+  clock_tick = .5;
   // glut can be controlled by command line arguments pass to glutInit().
   // In order to simplify argument parsing in gpl.cpp, command line
   // arguments are not passed to glutInit()

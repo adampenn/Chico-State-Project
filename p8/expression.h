@@ -18,6 +18,7 @@ class Expression {
     Expression(Operator_type oper, Expression* left);
     Expression(Variable* variable);
     Gpl_type get_type();
+    Variable* get_variable() const;
     int eval_int();//+-*/<>...
     double eval_double();
     string eval_string();//+

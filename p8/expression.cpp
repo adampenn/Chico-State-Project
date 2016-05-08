@@ -141,6 +141,10 @@ Gpl_type Expression::get_type() {
   return m_type;
 }
 
+Variable* Expression::get_variable() const {
+  return m_variable;
+}
+
 int Expression::eval_int() {
   if (m_kind == CONSTANT) {
     assert(m_type == INT);
@@ -149,7 +153,35 @@ int Expression::eval_int() {
     return m_variable->get_int_value();
   } else if (m_kind == BINARY) {
     switch (m_oper) {
-      case AND: {
+      case TOUCHES: {
+        int l_index = m_left->get_variable()->get_index();
+        int r_index = m_right->get_variable()->get_index();
+        if (l_index != INT_MIN && r_index != INT_MIN) {
+          return m_left->get_variable()->get_symbol()->get_game_object_value(l_index)->touches(m_right->get_variable()->get_symbol()->get_game_object_value(r_index));
+        } else if (l_index != INT_MIN && r_index == INT_MIN) {
+          return m_left->get_variable()->get_symbol()->get_game_object_value(l_index)->touches(m_right->get_variable()->get_symbol()->get_game_object_value());
+        } else if (l_index == INT_MIN && r_index != INT_MIN) {
+          return m_left->get_variable()->get_symbol()->get_game_object_value()->touches(m_right->get_variable()->get_symbol()->get_game_object_value(r_index));
+        } else if (l_index == INT_MIN && r_index == INT_MIN) {
+          return m_left->get_variable()->get_symbol()->get_game_object_value()->touches(m_right->get_variable()->get_symbol()->get_game_object_value());
+        }
+        assert(false);
+        break;
+      } case NEAR: {
+        int l_index = m_left->get_variable()->get_index();
+        int r_index = m_right->get_variable()->get_index();
+        if (l_index != INT_MIN && r_index != INT_MIN) {
+          return m_left->get_variable()->get_symbol()->get_game_object_value(l_index)->near(m_right->get_variable()->get_symbol()->get_game_object_value(r_index));
+        } else if (l_index != INT_MIN && r_index == INT_MIN) {
+          return m_left->get_variable()->get_symbol()->get_game_object_value(l_index)->near(m_right->get_variable()->get_symbol()->get_game_object_value());
+        } else if (l_index == INT_MIN && r_index != INT_MIN) {
+          return m_left->get_variable()->get_symbol()->get_game_object_value()->near(m_right->get_variable()->get_symbol()->get_game_object_value(r_index));
+        } else if (l_index == INT_MIN && r_index == INT_MIN) {
+          return m_left->get_variable()->get_symbol()->get_game_object_value()->near(m_right->get_variable()->get_symbol()->get_game_object_value());
+        }
+        assert(false);
+        break;
+      } case AND: {
         if (m_left->get_type() == DOUBLE || m_right->get_type() == DOUBLE) {
           return m_left->eval_double() && m_right->eval_double();
         } else if (m_left->get_type() == INT || m_right->get_type() == INT) {
@@ -363,5 +395,4 @@ string Expression::eval_string() {
   return "";
   assert(false && "WRITE THIS FUNCTION");
 }
-
 

@@ -38,6 +38,9 @@ Expression* create_binary_expression(Expression *left,
                                int legal_right
                               ) {
   if (!(left->get_type() & legal_left) || !(right->get_type() & legal_right)) {
+    if (oper == PLUS) {
+      return new Expression(0);
+    }
     if (!(left->get_type() & legal_left)) {
       Error::error(Error::INVALID_LEFT_OPERAND_TYPE, operator_to_string(oper));
     }
@@ -209,6 +212,7 @@ Expression* create_unary_expression(Expression *left,
 %type <union_statement_block>  statement_block
 %type <union_statement_block> if_block
 %type <union_string>          check_animation_parameter
+%type <union_operator>        geometric_operator
 // special token that does not match any production
 // used for characters that are not part of the language
 %token T_ERROR               "error"
@@ -566,12 +570,13 @@ animation_block:
       Symbol* cap = table->lookup(*$4);
       Animation_block* ab = NULL;
       if (symbol != NULL) {
-       // if (symbol->get_animation_block_value()->get_parameter_symbol()->get_type() == cap.get_type()) {
+        if (symbol->get_animation_block_value()->get_parameter_symbol()->get_type() != cap->get_type()) {
+          assert(false && "ISSUE ERROR");
           // some miss match error
-        //}
+        }
         statement_stack.push(symbol->get_animation_block_value());
       } else {
-        assert(false && "give error?");
+        Error::error(Error::NO_FORWARD_FOR_ANIMATION_BLOCK, *$2);
       }
     }
     T_RPAREN T_LBRACE statement_list T_RBRACE end_of_statement_block
@@ -775,8 +780,10 @@ statement_block_creator:
 //---------------------------------------------------------------------
 end_of_statement_block:
     {
-      $$ = statement_stack.top();
-      statement_stack.pop();
+      if (statement_stack.top() != NULL) {
+        $$ = statement_stack.top();
+        statement_stack.pop();
+      }
     }
     ;
 
@@ -864,6 +871,8 @@ exit_statement:
 assign_statement:
     variable T_ASSIGN expression
     {
+      Expression* three = $3;
+      Variable* one = $1;
       switch ($1->get_type()) {
         case INT: {
           if ($3->get_type() != INT) {
@@ -1203,7 +1212,15 @@ expression:
     }
     | variable geometric_operator variable
     {
-      assert(false && "P6");
+      Expression* one = new Expression($1);
+      Expression* three = new Expression($3);
+      $$ = create_binary_expression(
+                                     one,
+                                     $2,
+                                     three,
+                                     GAME_OBJECT,
+                                     GAME_OBJECT
+                                   );
     }
     ;
 
@@ -1243,7 +1260,13 @@ primary_expression:
 //---------------------------------------------------------------------
 geometric_operator:
     T_TOUCHES
+    {
+      $$ = TOUCHES; 
+    }
     | T_NEAR
+    {
+      $$ = NEAR;
+    }
     ;
 
 //---------------------------------------------------------------------
