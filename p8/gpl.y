@@ -27,6 +27,8 @@ Gpl_type cur_object_type = NO_TYPE;
 string cur_object_name = "";
 stack<Statement_block*> statement_stack;
 Event_manager* event_manager = Event_manager::instance();
+vector<string> forward_statments;
+vector<string> body_statments;
 // bison syntax to indicate the end of the header
 
 // Error checking
@@ -38,6 +40,15 @@ Expression* create_binary_expression(Expression *left,
                                int legal_right
                               ) {
   if (!(left->get_type() & legal_left) || !(right->get_type() & legal_right)) {
+    if (oper == TOUCHES || oper == NEAR) {
+      if (!(left->get_type() & GAME_OBJECT)) {
+        Error::error(Error::OPERAND_MUST_BE_A_GAME_OBJECT, left->get_variable()->get_symbol()->get_name());
+      }
+      if (!(right->get_type() & GAME_OBJECT)) {
+        Error::error(Error::OPERAND_MUST_BE_A_GAME_OBJECT, right->get_variable()->get_symbol()->get_name());
+      }
+      return new Expression(0);
+    }
     if (oper == PLUS) {
       return new Expression(0);
     }
@@ -237,6 +248,11 @@ Expression* create_unary_expression(Expression *left,
 //---------------------------------------------------------------------
 program:
     declaration_list block_list
+    {
+      for (int i = 0; i < forward_statments.size(); i++) {
+        Error::error(Error::NO_BODY_PROVIDED_FOR_FORWARD, forward_statments[i]);
+      }
+    }
     ;
 
 //---------------------------------------------------------------------
@@ -531,6 +547,7 @@ forward_declaration:
     T_FORWARD T_ANIMATION T_ID T_LPAREN animation_parameter T_RPAREN
     {
       if (!table->lookup(*$3)) {
+        forward_statments.push_back(*$3);
         Animation_block* ab = new Animation_block();
         ab->initialize($5, *$3);
         Symbol* symbol = new Symbol(*$3, ab);
@@ -569,10 +586,21 @@ animation_block:
       Symbol* symbol = table->lookup(*$2);
       Symbol* cap = table->lookup(*$4);
       Animation_block* ab = NULL;
+      for (int i = 0; i < body_statments.size(); i++) {
+        if (body_statments[i] == *$2) {
+          Error::error(Error::PREVIOUSLY_DEFINED_ANIMATION_BLOCK, *$2);
+        }
+      }
+      body_statments.push_back(*$2);
       if (symbol != NULL) {
-        if (symbol->get_animation_block_value()->get_parameter_symbol()->get_type() != cap->get_type()) {
-          assert(false && "ISSUE ERROR");
-          // some miss match error
+        int index = -1;
+        for (int i = 0; i < forward_statments.size(); i++) {
+          if (forward_statments[i] == *$2) {
+            index = i;
+          }
+        }
+        if (index != -1) {
+          forward_statments.erase(forward_statments.begin()+index);
         }
         statement_stack.push(symbol->get_animation_block_value());
       } else {
@@ -780,7 +808,7 @@ statement_block_creator:
 //---------------------------------------------------------------------
 end_of_statement_block:
     {
-      if (statement_stack.top() != NULL) {
+      if (!statement_stack.empty()) {
         $$ = statement_stack.top();
         statement_stack.pop();
       }
@@ -890,6 +918,7 @@ assign_statement:
           if ($3->get_type() != ANIMATION_BLOCK) {
             Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
           }
+          //Gpl_type left = $3->
           break;
         } default: {
           if ($1->get_type() & GAME_OBJECT) {

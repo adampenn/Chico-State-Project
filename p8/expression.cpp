@@ -168,6 +168,10 @@ int Expression::eval_int() {
         assert(false);
         break;
       } case NEAR: {
+        if (!(m_left->get_type() & GAME_OBJECT)) {
+          Error::error(Error::OPERAND_MUST_BE_A_GAME_OBJECT, m_left->get_variable()->get_symbol()->get_name());
+          return INT_MIN;
+        }
         int l_index = m_left->get_variable()->get_index();
         int r_index = m_right->get_variable()->get_index();
         if (l_index != INT_MIN && r_index != INT_MIN) {
