@@ -232,8 +232,11 @@ void Variable::set(Expression* expr) {
           case INT: {
             if (*m_field == "text") {
               m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_string());
+            } else if (*m_field == "rotation") {
+              m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_double());
+            } else {
+              m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_int());
             }
-            m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_int());
             break;
           } case DOUBLE: {
             m_symbol->get_game_object_value()->set_member_variable(*m_field, expr->eval_double());
