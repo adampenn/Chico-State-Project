@@ -593,6 +593,9 @@ animation_block:
       }
       body_statments.push_back(*$2);
       if (symbol != NULL) {
+        if (symbol->get_animation_block_value()->get_parameter_symbol()->get_name() != *$4) {
+          Error::error(Error::ANIMATION_PARAM_DOES_NOT_MATCH_FORWARD);
+        }
         int index = -1;
         for (int i = 0; i < forward_statments.size(); i++) {
           if (forward_statments[i] == *$2) {
