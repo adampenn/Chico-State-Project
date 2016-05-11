@@ -605,6 +605,9 @@ animation_block:
         if (index != -1) {
           forward_statments.erase(forward_statments.begin()+index);
         }
+        if (symbol->get_animation_block_value()->get_parameter_symbol()->get_type() != cap->get_type()) {
+          Error::error(Error::ANIMATION_PARAM_DOES_NOT_MATCH_FORWARD);
+        }
         statement_stack.push(symbol->get_animation_block_value());
       } else {
         Error::error(Error::NO_FORWARD_FOR_ANIMATION_BLOCK, *$2);
@@ -921,7 +924,12 @@ assign_statement:
           if ($3->get_type() != ANIMATION_BLOCK) {
             Error::error(Error::ASSIGNMENT_TYPE_ERROR, gpl_type_to_string($1->get_type()), gpl_type_to_string($3->get_type()));
           }
-          //Gpl_type left = $3->
+          
+          Gpl_type left = $1->get_symbol()->get_base_game_object_type();
+          Gpl_type right = $3->get_variable()->get_animation_block_value()->get_parameter_symbol()->get_base_game_object_type();
+          if (left != right) { 
+            Error::error(Error::ANIMATION_BLOCK_ASSIGNMENT_PARAMETER_TYPE_ERROR, gpl_type_to_string(left), gpl_type_to_string(right));
+          }
           break;
         } default: {
           if ($1->get_type() & GAME_OBJECT) {

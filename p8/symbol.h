@@ -45,6 +45,7 @@ class Symbol {
     void set(int value, int index = UNDEFINED_INDEX);
     void set(double value, int index = UNDEFINED_INDEX);
     void set(string value, int index = UNDEFINED_INDEX);
+    Gpl_type get_base_game_object_type() const;
     void set_game_object(Game_object* game_object);
     int get_int_value(int index = UNDEFINED_INDEX) const;
     double get_double_value(int index = UNDEFINED_INDEX) const;

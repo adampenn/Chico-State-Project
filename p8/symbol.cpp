@@ -115,6 +115,22 @@ int Symbol::get_size() const {
   return m_size;
 }
 
+Gpl_type Symbol::get_base_game_object_type() const {
+  if (m_type == CIRCLE || m_type == CIRCLE_ARRAY) {
+    return CIRCLE;
+  } else if (m_type == RECTANGLE || m_type == RECTANGLE_ARRAY) {
+    return RECTANGLE;
+  } else if (m_type == TRIANGLE || m_type == TRIANGLE_ARRAY) {
+    return TRIANGLE;
+  } else if (m_type == TEXTBOX || m_type == TEXTBOX_ARRAY) {
+    return TEXTBOX;
+  } else if (m_type == PIXMAP || m_type == PIXMAP_ARRAY) {
+    return PIXMAP;
+  }
+  assert(false && "No type declared");
+  return INT;
+}
+
 Gpl_type Symbol::get_base_type(){
   if (m_type == INT || m_type == INT_ARRAY) {
     return INT;
